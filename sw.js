@@ -1,6 +1,6 @@
-// Clawd Rdio offline cache (version 3a1d8d190d). The page is fetched fresh when online and kept for when it is not.
+// Clawd Rdio offline cache (version 8ed59e9f9d). The page is fetched fresh when online and kept for when it is not.
 // tools/publish-play.mjs fills in the version and writes this next to index.html.
-const CACHE = 'clawd-rdio-3a1d8d190d';
+const CACHE = 'clawd-rdio-8ed59e9f9d';
 const CORE = ['./', 'index.html', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png', 'apple-touch-icon.png'];
 
 self.addEventListener('install', (e) => {

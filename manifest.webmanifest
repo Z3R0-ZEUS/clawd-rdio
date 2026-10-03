@@ -1,7 +1,7 @@
 {
   "name": "Clawd Rdio",
   "short_name": "Clawd Rdio",
-  "description": "48 songs with sung vocals, a drum machine, analog and FM synths, a pattern arranger, a full-screen visualizer and swappable themes. Works on your phone. Free. Press the spacebar to play.",
+  "description": "48 songs (12 with sung vocals, plus autotune and harmonies), a drum machine, a loop recorder, analog and FM synths, a pattern arranger, a full-screen visualizer and swappable themes. Works on your phone. Free. Press the spacebar to play.",
   "start_url": "./",
   "scope": "./",
   "id": "./",
