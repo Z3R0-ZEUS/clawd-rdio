@@ -1,0 +1,36 @@
+{
+  "name": "Clawd Rdio",
+  "short_name": "Clawd Rdio",
+  "description": "48 songs with sung vocals, a drum machine, analog and FM synths, a pattern arranger, a full-screen visualizer and swappable themes. Works on your phone. Free. Press the spacebar to play.",
+  "start_url": "./",
+  "scope": "./",
+  "id": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0a0913",
+  "theme_color": "#0a0913",
+  "categories": [
+    "music",
+    "entertainment"
+  ],
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

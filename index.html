@@ -4,18 +4,24 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="color-scheme" content="dark">
-<meta name="description" content="48 songs with sung vocals, a drum machine, analog and FM synths, a pattern arranger, a full-screen visualizer and swappable themes. Free. Press the spacebar to play.">
+<meta name="description" content="48 songs with sung vocals, a drum machine, analog and FM synths, a pattern arranger, a full-screen visualizer and swappable themes. Works on your phone. Free. Press the spacebar to play.">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Clawd Rdio: an 80s synth groovebox in your browser">
-<meta property="og:description" content="48 songs with sung vocals, a drum machine, analog and FM synths, a pattern arranger, a full-screen visualizer and swappable themes. Free. Press the spacebar to play.">
+<meta property="og:description" content="48 songs with sung vocals, a drum machine, analog and FM synths, a pattern arranger, a full-screen visualizer and swappable themes. Works on your phone. Free. Press the spacebar to play.">
 <meta property="og:url" content="https://z3r0-zeus.github.io/clawd-rdio/">
 <meta property="og:image" content="https://z3r0-zeus.github.io/clawd-rdio/icon.png">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Clawd Rdio: an 80s synth groovebox in your browser">
-<meta name="twitter:description" content="48 songs with sung vocals, a drum machine, analog and FM synths, a pattern arranger, a full-screen visualizer and swappable themes. Free. Press the spacebar to play.">
+<meta name="twitter:description" content="48 songs with sung vocals, a drum machine, analog and FM synths, a pattern arranger, a full-screen visualizer and swappable themes. Works on your phone. Free. Press the spacebar to play.">
 <meta name="twitter:image" content="https://z3r0-zeus.github.io/clawd-rdio/icon.png">
 <link rel="icon" type="image/png" href="icon.png">
-<link rel="apple-touch-icon" href="icon.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#0a0913">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Clawd Rdio">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 </head>
 <body>
 <title>Clawd Rdio</title>
@@ -745,6 +751,167 @@ html.viz-open, html.viz-open body { overflow: hidden; }
 .viz[data-scene="halftone"] .viz-prog .vp-fill { background: var(--viz-c); box-shadow: none; }
 @media (max-width: 720px) { .viz-clock { right: 14px; } .viz-now { bottom: calc(128px + env(safe-area-inset-bottom, 0px)); } }
 
+/* ---------- phones ---------- */
+.mbar, .mnav, .touch-only { display: none; }
+html { -webkit-text-size-adjust: 100%; }
+button, select, input, textarea, .pad, .kb, .arr-cell, .trk, .jam-pad { -webkit-tap-highlight-color: transparent; }
+button, select, label, .arr-cell, .trk { touch-action: manipulation; }
+body { overscroll-behavior-y: contain; }
+
+/* a touch screen: bigger targets, and the piano roll scrolls with a finger (Draw mode switches that off) */
+@media (pointer: coarse) {
+  .touch-only { display: inline-flex; }
+  .btn { height: 40px; padding: 0 13px; }
+  .btn.small { height: 36px; padding: 0 11px; }
+  .btn.icon, .btn.small.icon { width: 40px; padding: 0; }
+  .sel, .txt { height: 40px; font-size: 16px; }
+  textarea, input { font-size: 16px; }
+  .tabs button { padding: 13px 16px 12px; }
+  .trk .ms { width: 36px; height: 32px; }
+  .trk .patchip { min-width: 36px; height: 32px; }
+  .tbtn { width: 54px; height: 54px; }
+  .mode-switch button { height: 54px; }
+  .pad { height: 68px; }
+  .kb { height: 124px; }
+  .seg button { min-height: 38px; }
+  .grid-area .gscroll { touch-action: pan-x pan-y; }
+  .grid-area.draw .gscroll { touch-action: none; }
+  .vbtn { height: 42px; min-width: 42px; }
+  .vp-add { width: 38px; height: 38px; }
+  .vp-mini { height: 32px; }
+  .vp-song { padding: 9px 4px; }
+}
+
+@media (max-width: 760px) {
+  :root { --nav-h: 60px; --mbar-h: 58px; }
+  html, body { height: auto; }
+  .app { display: block; max-width: none; min-height: 100dvh; padding: 8px 8px calc(var(--nav-h) + var(--mbar-h) + 20px + env(safe-area-inset-bottom, 0px)); }
+  .app > * { margin: 0 0 8px; }
+
+  /* one page at a time */
+  html[data-mtab] .topbar, html[data-mtab] .arranger, html[data-mtab] .workspace, html[data-mtab] .keys { display: none; }
+  html[data-mtab="play"] .topbar { display: flex; }
+  html[data-mtab="parts"] .arranger { display: block; }
+  html[data-mtab="tracks"] .workspace, html[data-mtab="edit"] .workspace { display: block; min-height: 0; }
+  html[data-mtab="tracks"] .editor { display: none; }
+  html[data-mtab="edit"] .rack { display: none; }
+  html[data-mtab="keys"] .keys { display: flex; }
+  .rack { max-height: none; }
+  .rack-list { grid-template-columns: 1fr; }
+
+  /* tab bar and mini player */
+  .mnav {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 45; display: grid; grid-template-columns: repeat(5, 1fr);
+    background: var(--chassis); border-top: 1px solid var(--line-hi); padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  .mnav button {
+    height: var(--nav-h); border: 0; background: transparent; color: var(--dim); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px;
+    font-family: var(--font-display); font-size: 9.5px; letter-spacing: .14em; text-transform: uppercase;
+  }
+  .mnav button svg { width: 25px; height: 25px; fill: currentColor; }
+  .mnav button.on { color: var(--neon); box-shadow: inset 0 3px 0 var(--neon); }
+  .mbar {
+    position: fixed; left: 8px; right: 8px; bottom: calc(var(--nav-h) + env(safe-area-inset-bottom, 0px) + 6px); z-index: 44; height: var(--mbar-h);
+    display: flex; align-items: center; gap: 10px; padding: 0 8px; background: var(--chassis); border: 1px solid var(--line-hi); border-radius: 14px;
+    box-shadow: 0 8px 24px rgba(0,0,0,.45);
+  }
+  html[data-mtab="play"] .mbar, html.viz-open .mbar, html.viz-open .mnav { display: none; }
+  .mb-play { width: 42px; height: 42px; flex: none; border-radius: 50%; border: 1px solid var(--line-hi); background: var(--panel); color: var(--fg); display: grid; place-items: center; }
+  .mb-play.on { background: var(--neon); border-color: var(--neon); color: var(--on); }
+  .mb-play svg, .mb-btn svg { width: 20px; height: 20px; fill: currentColor; }
+  .mb-play.on svg { fill: var(--dark-ink); }
+  .mb-info { flex: 1; min-width: 0; line-height: 1.15; }
+  .mb-title { font-weight: 700; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .mb-time { font-family: var(--font-lcd); font-size: 17px; color: var(--lcd-fg); letter-spacing: .04em; font-variant-numeric: tabular-nums; }
+  .mb-btn { width: 42px; height: 42px; flex: none; border: 0; background: transparent; color: var(--muted); border-radius: 10px; display: grid; place-items: center; }
+
+  /* the Play page */
+  .topbar { padding: 12px 12px 10px; gap: 10px; }
+  .logo-script { font-size: 40px; }
+  .top-actions { gap: 8px; width: 100%; }
+  .top-actions .btn { flex: 1 1 auto; }
+  .lcd .v { max-width: none; }
+
+  /* parts, tracks, editor */
+  .arranger { padding: 10px; }
+  .arr-head { gap: 6px; }
+  .editor .tabs { position: sticky; top: 0; z-index: 3; }
+  .grid-area { min-height: 340px; }
+  .tabpanel .toolbar, .tabpanel .tb { gap: 6px; }
+
+  /* dialogs become sheets */
+  .modal-bg { padding: 8px; align-items: end; }
+  .modal { width: 100% !important; max-height: calc(100dvh - 16px); border-radius: 14px; }
+  .modal-in { padding: 14px 14px 18px; }
+  .songitem { grid-template-columns: 1fr; }
+  .songitem .acts { grid-row: auto; grid-column: 1; justify-content: flex-start; margin-top: 6px; }
+  .theme-grid { grid-template-columns: 1fr; }
+  .theme-pickers { grid-template-columns: 1fr; }
+
+  /* the player */
+  .viz-clock { right: 14px; }
+  .viz-controls { left: 8px; right: 8px; bottom: calc(14px + env(safe-area-inset-bottom, 0px)); }
+  .viz-panel { left: 8px; right: 8px; width: auto; top: calc(56px + env(safe-area-inset-top, 0px)); bottom: calc(150px + env(safe-area-inset-bottom, 0px)); }
+  .viz-now { bottom: calc(138px + env(safe-area-inset-bottom, 0px)); max-width: calc(100vw - 32px); }
+  .viz-title { font-size: clamp(28px, 9vw, 52px); }
+}
+@media (max-width: 400px) {
+  .mnav button { letter-spacing: .08em; font-size: 9px; }
+}
+
+/* ---------- jam pads, home card, sing-along line ---------- */
+.jam { display: flex; flex-direction: column; gap: 6px; flex: 1 1 auto; min-width: 0; touch-action: none; user-select: none; -webkit-user-select: none; }
+.jam[hidden] { display: none; }
+.jam-head { font-size: 11.5px; color: var(--muted); }
+.jam-row { display: grid; gap: 6px; }
+.jam-pad {
+  height: 58px; min-width: 0; border-radius: 8px; border: 1px solid var(--line); padding: 0 2px; touch-action: none;
+  background: linear-gradient(180deg, var(--key-hi), var(--key-lo)); color: var(--fg);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; transition: transform .05s;
+}
+.jam-pad b { font-family: var(--font-display); font-size: 16px; letter-spacing: .04em; line-height: 1; }
+.jam-pad i { font-style: normal; font-family: var(--font-lcd); font-size: 13px; color: var(--dim); line-height: 1; }
+.jam-pad.root { border-color: color-mix(in srgb, var(--tc) 60%, var(--line)); }
+.jam-pad.root b { color: var(--tc); }
+.jam-pad.chord { height: 50px; background: linear-gradient(180deg, color-mix(in srgb, var(--tc) 16%, var(--key-hi)), var(--key-lo)); }
+.jam-pad.down { background: var(--tc); color: var(--dark-ink); transform: scale(.97); }
+.jam-pad.down b, .jam-pad.down i { color: var(--dark-ink); }
+@media (pointer: coarse) { .jam-pad { height: 76px; } .jam-pad.chord { height: 64px; } }
+
+.viz-lyric {
+  position: absolute; left: 50%; bottom: calc(158px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); max-width: 92vw; text-align: center; pointer-events: none;
+  font-family: var(--font-display); font-size: clamp(18px, 3vw, 34px); letter-spacing: .08em; color: var(--on); opacity: 0; transition: opacity .25s;
+  text-shadow: 0 0 10px var(--cyan), 0 0 26px color-mix(in srgb, var(--cyan) 55%, transparent), 0 2px 0 rgba(0,0,0,.6);
+}
+.viz-lyric.on { opacity: 1; }
+.viz[data-scene="keys"] .viz-lyric { bottom: calc(96px + env(safe-area-inset-bottom, 0px)); }
+
+.mhome { display: none; }
+@media (max-width: 760px) {
+  html[data-mtab="play"] .mhome { display: flex; flex-direction: column; gap: 10px; }
+  .mhome .pick {
+    position: relative; display: grid; grid-template-columns: 1fr 44px; grid-template-rows: auto auto auto; column-gap: 10px; align-items: center; text-align: left;
+    padding: 14px 14px 14px 16px; border-radius: 14px; border: 1px solid var(--line-hi); color: var(--fg);
+    background: linear-gradient(135deg, color-mix(in srgb, var(--neon) 22%, var(--chassis)), color-mix(in srgb, var(--cyan) 14%, var(--chassis)));
+  }
+  .pick .pk-k { grid-column: 1; font-family: var(--font-display); font-size: 10px; letter-spacing: .22em; color: var(--cyan); }
+  .pick .pk-n { grid-column: 1; font-size: 20px; font-weight: 700; line-height: 1.15; margin: 2px 0; }
+  .pick .pk-m { grid-column: 1; font-family: var(--font-lcd); font-size: 16px; color: var(--lcd-fg); }
+  .pick svg { grid-column: 2; grid-row: 1 / span 3; width: 44px; height: 44px; padding: 10px; box-sizing: border-box; border-radius: 50%; background: var(--neon); fill: var(--dark-ink); }
+  .home-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .home-grid .btn { height: 48px; font-size: 14px; justify-content: center; }
+  .home-note { margin: 0; font-size: 12.5px; color: var(--muted); line-height: 1.5; padding: 0 4px; }
+  .viz-lyric { bottom: calc(262px + env(safe-area-inset-bottom, 0px)); font-size: clamp(17px, 5vw, 24px); }
+  .viz[data-scene="keys"] .viz-lyric { bottom: calc(190px + env(safe-area-inset-bottom, 0px)); }
+  #btnShare { display: none; }
+}
+@media (pointer: coarse) and (max-width: 760px) {
+  .arr-tname { height: 36px; }
+  .arr-cell { height: 36px; }
+  .arr-sec { height: 48px; }
+  .arr-cell .blk { font-size: 18px; }
+}
+
 </style>
 <div class="app" id="app">
   <header class="topbar">
@@ -778,12 +945,30 @@ html.viz-open, html.viz-open body { overflow: hidden; }
       <button class="btn" id="btnThemes" title="Change the look of the whole app, or make your own theme">Themes</button>
       <button class="btn" id="btnSave">Save</button>
       <button class="btn" id="btnExport">Export</button>
+      <button class="btn" id="btnShare" title="Share this song as a link">Share</button>
       <button class="btn cyan" id="btnViz" title="Full-screen visualizer for an audience"><svg class="ico" viewBox="0 0 24 24"><path d="M3 5h18v11H3zm2 2v7h14V7zM8 19h8v2H8z"/></svg>Visualizer</button>
       <button class="btn icon" id="btnUndo" title="Undo (Ctrl+Z)" aria-label="Undo"><svg class="ico" viewBox="0 0 24 24"><path d="M12.5 8c-2.65 0-5.05 1-6.9 2.6L2 7v9h9l-3.62-3.62A7.95 7.95 0 0 1 12.5 10.5c3.54 0 6.55 2.31 7.6 5.5l2.37-.78C21.08 11.03 17.15 8 12.5 8z"/></svg></button>
       <button class="btn icon" id="btnRedo" title="Redo (Ctrl+Shift+Z)" aria-label="Redo"><svg class="ico" viewBox="0 0 24 24"><path d="M18.4 10.6C16.55 9 14.15 8 11.5 8c-4.65 0-8.58 3.03-9.96 7.22l2.36.78C4.95 12.81 7.96 10.5 11.5 10.5c1.95 0 3.73.72 5.12 1.88L13 16h9V7z"/></svg></button>
+      <button class="btn" id="btnInstall" hidden title="Put Clawd Rdio on your home screen">Install app</button>
       <button class="btn icon" id="btnHelp" title="How it works" aria-label="How it works">?</button>
     </div>
   </header>
+
+  <section class="mhome" id="mhome" aria-label="Quick start">
+    <button class="pick" id="homePick" aria-label="Play today's pick">
+      <span class="pk-k">TODAY&rsquo;S PICK</span><span class="pk-n" id="homePickName">&mdash;</span><span class="pk-m" id="homePickMeta"></span>
+      <svg viewBox="0 0 24 24"><path d="M7 4.5l12.5 7.5L7 19.5z"/></svg>
+    </button>
+    <div class="home-grid">
+      <button class="btn" id="homeRadio" data-radio="label" title="Every song, shuffled, with the Clawd Rdio jingle between songs">Radio</button>
+      <button class="btn" id="homeSurprise" title="A brand-new random song, made just now">Surprise me</button>
+      <button class="btn" id="homeSleep" data-sleep title="Fade the music out and stop after a while">Sleep timer</button>
+      <button class="btn" id="homeSongs">All songs</button>
+      <button class="btn" id="homeJam">Jam pads</button>
+      <button class="btn" id="homeShare">Share song</button>
+    </div>
+    <p class="home-note">Tip: tap <b>Parts</b>, <b>Tracks</b> and <b>Edit</b> below to take a song apart, or <b>Keys</b> to play along.</p>
+  </section>
 
   <section class="arranger" aria-label="Song arrangement">
     <div class="arr-head">
@@ -831,13 +1016,29 @@ html.viz-open, html.viz-open body { overflow: hidden; }
         <button class="btn small icon" id="octDown" title="Octave down" aria-label="Octave down">&minus;</button>
         <span class="lbl" id="octLab">OCT 3</span>
         <button class="btn small icon" id="octUp" title="Octave up" aria-label="Octave up">+</button>
+        <button class="btn small" id="jamBtn" title="Switch between big in-key pads and the piano keys"><span class="led"></span>Pads</button>
         <button class="btn small rec" id="recBtn" title="Record what you play into the pattern while it plays"><span class="led"></span>Rec</button>
       </div>
     </div>
     <div class="kb" id="kb"></div>
     <div class="pads" id="pads" hidden></div>
+    <div class="jam" id="jam" hidden></div>
   </footer>
 </div>
+
+<div class="mbar" id="mbar">
+  <button class="mb-play" id="mbPlay" aria-label="Play"></button>
+  <div class="mb-info"><div class="mb-title" id="mbTitle">Clawd Rdio</div><div class="mb-time" id="mbTime">0:00 / 0:00</div></div>
+  <button class="mb-btn" id="mbNext" aria-label="Next song"><svg viewBox="0 0 24 24"><path d="M5 5l9 7-9 7zm10 0h3v14h-3z"/></svg></button>
+  <button class="mb-btn" id="mbViz" aria-label="Open the visualizer"><svg viewBox="0 0 24 24"><path d="M3 5h18v11H3zm2 2v7h14V7zM8 19h8v2H8z"/></svg></button>
+</div>
+<nav class="mnav" id="mnav" aria-label="Sections">
+  <button data-go="play" class="on"><svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm-2 5.5 7 4.5-7 4.5z"/></svg><span>Play</span></button>
+  <button data-go="parts"><svg viewBox="0 0 24 24"><path d="M3 4h8v7H3zm10 0h8v7h-8zM3 13h8v7H3zm10 0h8v7h-8z"/></svg><span>Parts</span></button>
+  <button data-go="tracks"><svg viewBox="0 0 24 24"><path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/></svg><span>Tracks</span></button>
+  <button data-go="edit"><svg viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.8 9.94l-3.75-3.75L3 17.25zM20.7 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg><span>Edit</span></button>
+  <button data-go="keys"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8 4h2v9H8zm6 0h2v9h-2z"/></svg><span>Keys</span></button>
+</nav>
 
 <script>
 /* ---- audio/clips ---- */
@@ -2165,7 +2366,7 @@ function scheduleStep(eng, song, secIdx, step, time, stepDur, skip, hitsOut) {
       if (n.s !== ls) continue;
       if (skip && skip.has(n)) { skip.delete(n); continue; }
       any = true;
-      if (hitsOut) hitsOut.push({ c: track.color, d: track.type === 'drum', n: track.type === 'drum' ? n.n : n.n + ((track.synth && track.synth.oct) || 0) * 12, v: n.v, l: n.l || 1, ti });
+      if (hitsOut) hitsOut.push({ c: track.color, d: track.type === 'drum', n: track.type === 'drum' ? n.n : n.n + ((track.synth && track.synth.oct) || 0) * 12, v: n.v, l: n.l || 1, ti, clip: track.type === 'drum' && track.voices && track.voices[n.n] ? track.voices[n.n].clip : undefined });
       if (track.type === 'drum') playDrum(eng, ch, track, n.n, n.v, tt);
       else {
         const end = step + n.l;
@@ -3205,10 +3406,11 @@ const Grid = {
     this.W = W; this.H = H;
     const steps = this.pat ? this.pat.len : 16;
     this.labelW = this.kind === 'drum' ? 104 : 48;
-    this.rowH = this.kind === 'drum' ? clamp(Math.floor((H - 12) / 12), 20, 36) : 15;
+    const coarse = Mobile.isTouch();
+    this.rowH = this.kind === 'drum' ? clamp(Math.floor((H - 12) / 12), coarse ? 26 : 20, 36) : (coarse ? 22 : 15);
     const sb = 12;
     const fit = (W - this.labelW - sb) / steps;
-    this.cellW = clamp(Math.floor(Math.max(fit, 14) * (App.ui.zoom || 1)), 8, 72);
+    this.cellW = clamp(Math.floor(Math.max(fit, coarse ? 22 : 14) * (App.ui.zoom || 1)), 8, 72);
     const rows = this.kind === 'drum' ? 12 : ROLL_HI - ROLL_LO + 1;
     this.spacer.style.width = this.labelW + steps * this.cellW + 'px';
     this.spacer.style.height = rows * this.rowH + 'px';
@@ -3414,8 +3616,17 @@ const Grid = {
     return null;
   },
 
+  /* On a touch screen in Scroll mode a quick tap adds or removes a note and a drag scrolls; the pointer is cancelled by the browser when it scrolls. */
+  edgePx() { return Mobile.isTouch() ? 16 : 9; },
+  tapApply(t) {
+    const fake = { currentTarget: this.scroll, pointerId: t.id, pointerType: 'mouse', button: 0, clientX: t.x, clientY: t.y, shiftKey: false, preventDefault() {} };
+    this.down(fake);
+    this.up(fake);
+  },
+
   down(e) {
     if (e.currentTarget !== this.scroll) return;
+    if (e.pointerType === 'touch' && !App.ui.touchDraw) { this.tap = { id: e.pointerId, x: e.clientX, y: e.clientY, t: performance.now() }; return; }
     const p = this.locate(e);
     if (this.kind === 'drum') return this.drumDown(e, p);
     if (p.row < 0 || p.row > ROLL_HI - ROLL_LO) return;
@@ -3432,7 +3643,7 @@ const Grid = {
     History.push(App.song);
     try { this.scroll.setPointerCapture(e.pointerId); } catch (err) { /* ignore */ }
     if (hit) {
-      const edgeW = Math.min(9, hit.l * this.cellW * 0.4);
+      const edgeW = Math.min(this.edgePx(), hit.l * this.cellW * 0.4);
       const endX = (hit.s + hit.l) * this.cellW;
       if (p.gx > endX - edgeW) this.drag = { mode: 'resize', n: hit };
       else this.drag = { mode: 'move', n: hit, off: p.stepF - hit.s, x0: e.clientX, y0: e.clientY, moved: false, lastNote: hit.n };
@@ -3460,7 +3671,7 @@ const Grid = {
       if (p.label) { this.scroll.style.cursor = 'pointer'; return; }
       const hit = this.noteAt(p);
       if (hit) {
-        const edgeW = Math.min(9, hit.l * this.cellW * 0.4);
+        const edgeW = Math.min(this.edgePx(), hit.l * this.cellW * 0.4);
         this.scroll.style.cursor = p.gx > (hit.s + hit.l) * this.cellW - edgeW ? 'ew-resize' : 'grab';
       } else this.scroll.style.cursor = 'crosshair';
       return;
@@ -3486,6 +3697,12 @@ const Grid = {
   },
 
   up(e) {
+    if (this.tap && this.tap.id === e.pointerId) {
+      const t = this.tap;
+      this.tap = null;
+      if (e.type === 'pointerup' && Math.hypot(e.clientX - t.x, e.clientY - t.y) < 10 && performance.now() - t.t < 700) this.tapApply(t);
+      return;
+    }
     const d = this.drag;
     if (!d) return;
     this.drag = null;
@@ -3614,11 +3831,12 @@ function renderPatternPanel() {
     keySel.style.height = scSel.style.height = '24px';
     tb.append(h('span', { class: 'lbl' }, 'Key'), keySel, scSel);
   }
+  tb.append(h('button', { class: 'btn small touch-only' + (App.ui.touchDraw ? ' on' : ''), title: 'Scroll: tap adds or removes a note, drag scrolls.  Draw: drag to paint, move and resize.', onclick: () => { App.ui.touchDraw = !App.ui.touchDraw; renderPatternPanel(); } }, App.ui.touchDraw ? '✏ Draw' : '✋ Scroll'));
   tb.append(h('button', { class: 'btn small icon', title: 'Zoom out', 'aria-label': 'Zoom out', onclick: () => { App.ui.zoom = clamp((App.ui.zoom || 1) / 1.35, 0.4, 4); Grid.layout(); Grid.draw(); Grid.drawLane(); } }, '−'));
   tb.append(h('button', { class: 'btn small icon', title: 'Zoom in', 'aria-label': 'Zoom in', onclick: () => { App.ui.zoom = clamp((App.ui.zoom || 1) * 1.35, 0.4, 4); Grid.layout(); Grid.draw(); Grid.drawLane(); } }, '+'));
   panel.append(tb);
 
-  const area = h('div', { class: 'grid-area' });
+  const area = h('div', { class: 'grid-area' + (App.ui.touchDraw ? ' draw' : '') });
   panel.append(area);
   let lane = null;
   if (t.type !== 'drum') { lane = h('div', { class: 'lane', title: 'Drag up and down to set note velocity' }); panel.append(lane); }
@@ -3989,6 +4207,7 @@ function recordOn(t, note, vel, now) {
 /* ---------- on-screen keyboard and pads ---------- */
 function markKey(note, on) {
   const t = App.track();
+  if (t.type !== 'drum' && Jam.enabled()) return; // the Jam pads light themselves
   const sel = t.type === 'drum' ? '.pad[data-n="' + note + '"]' : '#kb [data-n="' + note + '"]';
   const el = $(sel);
   if (el) el.classList.toggle('down', on);
@@ -3998,7 +4217,7 @@ function buildKeyboard() {
   const kb = $('#kb');
   kb.textContent = '';
   const W = kb.clientWidth || 700;
-  const nWhite = clamp(Math.floor(W / 30), 8, 29);
+  const nWhite = clamp(Math.floor(W / (Mobile.isTouch() ? 40 : 30)), 7, 29);
   const kw = W / nWhite;
   const base = 12 * (App.ui.oct + 1);
   let wi = 0, note = base;
@@ -4074,11 +4293,15 @@ function renderKeys() {
   now.textContent = '';
   now.append('Playing ', h('b', null, t.name), ' · ' + snd);
   const drum = t.type === 'drum';
-  $('#kb').hidden = drum;
+  const jam = !drum && Jam.enabled();
+  $('#kb').hidden = drum || jam;
   $('#pads').hidden = !drum;
+  $('#jam').hidden = !jam;
+  $('#jamBtn').hidden = drum;
+  $('#jamBtn').classList.toggle('on', jam);
   $('#octDown').hidden = drum; $('#octUp').hidden = drum; $('#octLab').hidden = drum;
   $('#octLab').textContent = 'C' + App.ui.oct;
-  if (drum) buildPads(); else buildKeyboard();
+  if (drum) buildPads(); else if (jam) Jam.build(); else buildKeyboard();
 }
 
 /* ---------- transport ---------- */
@@ -4087,16 +4310,21 @@ function startPlay() {
   Live.recPushed = false;
   App.tr.start(App.sel.section, 0);
   $('#btnPlay').classList.add('on');
+  Mobile.playing(true);
 }
 function stopPlay(hard) {
   App.tr.stop(hard);
   allLiveOff();
   $('#btnPlay').classList.remove('on');
+  Mobile.playing(false);
+  Lyrics.clear();
   Grid.setPlayhead(null);
   arrangerPlayhead(null);
   updateLCD(null);
 }
-function togglePlay() { if (App.tr.playing) stopPlay(false); else startPlay(); }
+/* the listener asked to stop: that also ends the radio */
+function userStop(hard) { if (typeof Radio !== 'undefined') Radio.off(true); stopPlay(hard); }
+function togglePlay() { if (App.tr.playing) userStop(false); else startPlay(); }
 
 function setMode(m) {
   App.tr.mode = m;
@@ -4118,7 +4346,9 @@ function updateLCD(cur) {
     pos = String(sectionStartStep(song, App.sel.section) / 16 + 1).padStart(3, '0') + '.1.1';
   }
   const stepNow = cur && song.sections[cur.sec] ? sectionStartStep(song, cur.sec) + cur.step : App.sel.section > 0 ? sectionStartStep(song, App.sel.section) : 0;
-  pos += '  ' + fmtTime((stepNow * 60) / song.bpm / 4) + '/' + fmtTime(songSeconds(song));
+  const clock = fmtTime((stepNow * 60) / song.bpm / 4) + ' / ' + fmtTime(songSeconds(song));
+  Mobile.sync(song.name, clock);
+  pos += '  ' + clock.replace(' / ', '/');
   const key = pos + '|' + part + '|' + song.name;
   if (key === lcdLast) return;
   lcdLast = key;
@@ -4141,7 +4371,7 @@ function renderTransport() {
 
 function initTransport() {
   $('#btnPlay').addEventListener('click', togglePlay);
-  $('#btnStop').addEventListener('click', () => stopPlay(true));
+  $('#btnStop').addEventListener('click', () => userStop(true));
   $('#modeLoop').addEventListener('click', () => setMode('loop'));
   $('#modeSong').addEventListener('click', () => setMode('song'));
   const bpm = $('#bpm');
@@ -4241,7 +4471,7 @@ function initShortcuts() {
     }
     if (e.altKey) return;
     if (e.code === 'Space') { e.preventDefault(); togglePlay(); return; }
-    if (e.code === 'Escape') { stopPlay(true); return; }
+    if (e.code === 'Escape') { userStop(true); return; }
     if (e.code === 'Minus') { App.ui.oct = clamp(App.ui.oct - 1, 0, 7); renderKeys(); return; }
     if (e.code === 'Equal') { App.ui.oct = clamp(App.ui.oct + 1, 0, 7); renderKeys(); return; }
     const off = CODEMAP[e.code];
@@ -4343,7 +4573,7 @@ function onMidi(msg) {
 }
 
 Object.assign(App.renderers, { keys: renderKeys, transport: renderTransport, editor: renderEditor });
-Object.assign(ND, { initTransport, initShortcuts, startPlay, stopPlay, togglePlay, setMode, updateLCD, drawScope, enableMIDI, undo, redo, allLiveOff });
+Object.assign(ND, { initTransport, initShortcuts, startPlay, stopPlay, userStop, togglePlay, setMode, updateLCD, drawScope, enableMIDI, undo, redo, allLiveOff });
 
 /* ---- js/12-storage.js ---- */
 /* Clawd Rdio — song library, saving, import/export, audio export */
@@ -4364,7 +4594,9 @@ function loadSong(song, opts) {
   App.song = song;
   App.lib.libId = opts.libId || null;
   App.lib.demoKey = opts.demoKey || null;
+  App.lib.genSeed = null;
   App.lib.dirty = false;
+  if (!opts.radio && typeof Radio !== 'undefined') Radio.off(true);
   App.sel.section = clamp(opts.section || 0, 0, song.sections.length - 1);
   App.sel.track = opts.track && song.tracks.find((t) => t.id === opts.track) ? opts.track : pickStartTrack(song);
   if (!opts.keepHistory) History.clear();
@@ -4372,6 +4604,7 @@ function loadSong(song, opts) {
   if (App.eng) { App.eng.syncTracks(song, true); App.eng.applyMaster(song.fx, song.bpm, true); }
   VocalBank.preload(song);
   App.changed('all');
+  Mobile.media();
   App.lib.dirty = false;
 }
 
@@ -4624,6 +4857,11 @@ function renderLibraryBody() {
       h('button', { class: 'btn', onclick: importFile }, 'Open a song file'),
       h('button', { class: 'btn', onclick: () => saveToLibrary(true) }, 'Save as a copy'),
       h('button', { class: 'btn', title: 'Open the full-screen player with the song list and your playlist', onclick: () => { closeModal(); Viz.show(); Viz.togglePanel(true); } }, 'Open the player')),
+    h('div', { class: 'row' },
+      h('button', { class: 'btn cyan', title: 'A brand-new random song, made just now', onclick: () => { closeModal(); Generator.surprise(); } }, 'Surprise me'),
+      h('button', { class: 'btn', 'data-radio': 'label', title: 'Every song, shuffled, with the Clawd Rdio jingle between songs', onclick: () => { closeModal(); Radio.toggle(); } }, 'Radio'),
+      h('button', { class: 'btn', title: 'One song a day, the same for everyone', onclick: () => { closeModal(); Features.playPick(); } }, 'Today’s pick: ' + todaysPick().name),
+      h('button', { class: 'btn', 'data-sleep': '', onclick: () => { closeModal(); Sleep.menu($('#btnSongs')); } }, 'Sleep timer')),
     h('p', null, DEMOS.length + ' full arrangements written with this app. Load one, press Play in Song mode, then take it apart: every note, sound and mix setting is editable. Open the Visualizer to put on a show.'),
     h('h3', null, 'ORIGINALS'),
     originals,
@@ -4642,6 +4880,8 @@ function renderLibraryBody() {
     h('h3', null, 'YOUR SONGS'),
     h('p', null, LibStore.where()),
     mine);
+  Radio.sync();
+  Sleep.sync();
 }
 
 function setModeSong() { ND.setMode('song'); }
@@ -5876,11 +6116,13 @@ const Viz = (ND.Viz = {
     this.autoBtn = mk('AUTO', 'Change scene at each new part of the song', () => { this.auto = !this.auto; this.sync(); }, 'txt');
     this.listBtn = mk('AUTO-PLAY', 'When a song ends, play the next one: your playlist if you made one, otherwise the next built-in song', () => this.togglePlaylist(), 'txt');
     this.fullBtn = mk(VIZ_ICONS.full, 'Full screen (F)', () => this.toggleFull());
+    this.radioBtn = mk('RADIO', 'Clawd Rdio radio: every song shuffled, with the station jingle between songs', () => Radio.toggle(), 'txt');
+    this.lyricEl = h('div', { class: 'viz-lyric', 'aria-live': 'off' });
     const controls = h('div', { class: 'viz-controls' },
       mk(VIZ_ICONS.prev, 'Previous scene (Left arrow)', () => this.setScene(this.scene - 1)), this.sceneLab,
       mk(VIZ_ICONS.fwd, 'Next scene (Right arrow)', () => this.setScene(this.scene + 1)),
       h('span', { class: 'viz-sep' }), mk(VIZ_ICONS.prevSong, 'Previous song', () => this.prevSong()), this.playBtn, mk(VIZ_ICONS.next, 'Next song (N)', () => this.nextSong()),
-      this.autoBtn, this.listBtn, this.songsBtn = mk('SONGS', 'Pick songs and build a playlist (L)', () => this.togglePanel(), 'txt'), h('span', { class: 'viz-sep' }), this.fullBtn,
+      this.autoBtn, this.listBtn, this.radioBtn, this.songsBtn = mk('SONGS', 'Pick songs and build a playlist (L)', () => this.togglePanel(), 'txt'), h('span', { class: 'viz-sep' }), this.fullBtn,
       mk(VIZ_ICONS.close, 'Close the visualizer (Esc)', () => this.close()));
     this.title = h('div', { class: 'viz-title' });
     this.meta = h('div', { class: 'viz-meta' });
@@ -5899,9 +6141,10 @@ const Viz = (ND.Viz = {
       this.canvas,
       h('div', { class: 'viz-brand' }, h('span', { class: 'logo-script' }, 'Clawd'), h('span', { class: 'logo-num' }, 'Rdio')),
       h('div', { class: 'viz-now' }, h('div', { class: 'viz-label' }, 'NOW PLAYING'), this.title, this.meta),
-      this.clock, this.card, this.hint, this.buildPanel(), this.prog, controls);
+      this.clock, this.card, this.lyricEl, this.hint, this.buildPanel(), this.prog, controls);
     document.body.append(this.el);
     this.g = this.canvas.getContext('2d');
+    if (!document.fullscreenEnabled && !this.el.requestFullscreen) this.fullBtn.style.display = 'none'; // iPhones cannot do full screen
     this.el.addEventListener('pointermove', () => this.poke());
     this.el.addEventListener('pointerdown', () => this.poke());
     this.canvas.addEventListener('dblclick', () => this.toggleFull());
@@ -5952,6 +6195,7 @@ const Viz = (ND.Viz = {
     if (!this.el) return;
     this.autoBtn.classList.toggle('on', this.auto);
     this.listBtn.classList.toggle('on', this.playlist);
+    this.radioBtn.classList.toggle('on', Radio.on);
     this.fullBtn.classList.toggle('on', !!document.fullscreenElement);
   },
 
@@ -6543,6 +6787,7 @@ Object.assign(Viz, {
 
   /* auto = called because the song ended (stop at the end of a playlist unless repeat is on) */
   nextSong(auto) {
+    if (Radio.on) { Radio.skip(); return; }
     this.loadQueue();
     if (this.queue.length) {
       let i = this.qi + 1;
@@ -6558,6 +6803,7 @@ Object.assign(Viz, {
     this.playKey(DEMOS[(i + 1) % DEMOS.length].key);
   },
   prevSong() {
+    if (Radio.on) { Radio.prev(); return; }
     this.loadQueue();
     if (this.queue.length && this.qi > 0) { this.qi--; this.playKey(this.queue[this.qi]); return; }
     const i = DEMOS.findIndex((d) => d.key === App.lib.demoKey);
@@ -6572,6 +6818,7 @@ Object.assign(Viz, {
     this.playKey(this.queue[this.qi]);
   },
   togglePlaylist() {
+    Radio.off(true);
     if (this.playlist) { this.playlist = false; this.sync(); return; }
     this.loadQueue();
     if (this.queue.length && this.queue[this.qi] !== App.lib.demoKey) {
@@ -10631,6 +10878,692 @@ const THEME_FLAT = `
   .modal, .pop, .toast, .viz-panel { box-shadow: none; }
 `;
 
+/* ---- js/45-mobile.js ---- */
+/* Clawd Rdio — phones. On a narrow screen the app becomes five full-screen pages behind a bottom tab bar (Play, Parts, Tracks,
+   Edit, Keys) with a mini player that is always in reach. This file also handles the things phones need: starting audio on the
+   first tap (iOS), keeping the screen awake while a song plays, lock-screen and headphone buttons, and "install as an app". */
+
+const Mobile = (ND.Mobile = {
+  tab: 'play',
+  deferredInstall: null,
+  wakeLock: null,
+  silent: null,
+
+  isPhone() { return !!(window.matchMedia && window.matchMedia('(max-width: 760px)').matches); },
+  isTouch() { return !!(window.matchMedia && window.matchMedia('(pointer: coarse)').matches); },
+  isIOS() { return /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1); },
+  standalone() { return (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true; },
+
+  /* ---------- pages ---------- */
+  go(tab, quiet) {
+    if (!['play', 'parts', 'tracks', 'edit', 'keys'].includes(tab)) tab = 'play';
+    Mobile.tab = tab;
+    document.documentElement.dataset.mtab = tab;
+    for (const b of document.querySelectorAll('#mnav button')) {
+      const on = b.dataset.go === tab;
+      b.classList.toggle('on', on);
+      b.setAttribute('aria-current', on ? 'page' : 'false');
+    }
+    local.set('nd84.mtab', tab);
+    if (!quiet) window.scrollTo(0, 0);
+    // pages that were hidden need their canvases and keys laid out again
+    if (tab === 'edit' && Grid.area) { Grid.layout(); Grid.draw(); Grid.drawLane(); }
+    if (tab === 'keys' && App.song) renderKeys();
+  },
+
+  /* ---------- the mini player ---------- */
+  sync(title, time) {
+    const t = $('#mbTitle'), c = $('#mbTime');
+    if (typeof Lyrics !== 'undefined' && Lyrics.shown) title = '♪ ' + Lyrics.shown;
+    if (t && t.textContent !== title) t.textContent = title;
+    if (c && c.textContent !== time) c.textContent = time;
+  },
+  playing(on) {
+    const b = $('#mbPlay');
+    if (b) { b.classList.toggle('on', on); b.innerHTML = on ? MB_STOP : MB_PLAY; b.setAttribute('aria-label', on ? 'Stop' : 'Play'); }
+    Mobile.wake(on);
+    Mobile.keepAlive(on);
+    if ('mediaSession' in navigator) navigator.mediaSession.playbackState = on ? 'playing' : 'paused';
+    if (on) Mobile.media();
+  },
+
+  /* ---------- keep the screen on while playing ---------- */
+  async wake(on) {
+    try {
+      if (on && 'wakeLock' in navigator && !Mobile.wakeLock) {
+        Mobile.wakeLock = await navigator.wakeLock.request('screen');
+        Mobile.wakeLock.addEventListener('release', () => { Mobile.wakeLock = null; });
+      } else if (!on && Mobile.wakeLock) { await Mobile.wakeLock.release(); Mobile.wakeLock = null; }
+    } catch (e) { /* not allowed right now: fine */ }
+  },
+
+  /* A silent <audio> loop makes the browser treat the page as a media player: lock-screen controls appear and the sound keeps going. */
+  keepAlive(on) {
+    if (!Mobile.silent) {
+      const n = 8000, bytes = new Uint8Array(44 + n);
+      const dv = new DataView(bytes.buffer);
+      const str = (o, s) => { for (let i = 0; i < s.length; i++) bytes[o + i] = s.charCodeAt(i); };
+      str(0, 'RIFF'); dv.setUint32(4, 36 + n, true); str(8, 'WAVEfmt '); dv.setUint32(16, 16, true); dv.setUint16(20, 1, true); dv.setUint16(22, 1, true);
+      dv.setUint32(24, 8000, true); dv.setUint32(28, 8000, true); dv.setUint16(32, 1, true); dv.setUint16(34, 8, true); str(36, 'data'); dv.setUint32(40, n, true);
+      bytes.fill(128, 44);
+      const a = document.createElement('audio');
+      a.src = URL.createObjectURL(new Blob([bytes], { type: 'audio/wav' }));
+      a.loop = true; a.setAttribute('playsinline', ''); a.preload = 'auto';
+      Mobile.silent = a;
+    }
+    try { if (on) Mobile.silent.play().catch(() => {}); else Mobile.silent.pause(); } catch (e) { /* ignore */ }
+  },
+
+  /* ---------- lock screen and headphone buttons ---------- */
+  media() {
+    if (!('mediaSession' in navigator) || typeof MediaMetadata === 'undefined' || !App.song) return;
+    const icon = document.querySelector('link[rel="apple-touch-icon"]');
+    try {
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title: App.song.name, artist: 'Clawd Rdio', album: 'Clawd Rdio',
+        artwork: icon ? [{ src: new URL('icon-512.png', icon.href).href, sizes: '512x512', type: 'image/png' }] : [],
+      });
+    } catch (e) { /* ignore */ }
+  },
+  initMedia() {
+    if (!('mediaSession' in navigator)) return;
+    const set = (a, f) => { try { navigator.mediaSession.setActionHandler(a, f); } catch (e) { /* not supported */ } };
+    set('play', () => { if (!App.tr.playing) startPlay(); });
+    set('pause', () => { if (App.tr.playing) userStop(false); });
+    set('stop', () => userStop(true));
+    set('nexttrack', () => Mobile.next());
+    set('previoustrack', () => Viz.prevSong());
+  },
+  next() { if (typeof Radio !== 'undefined' && Radio.on) Radio.skip(); else Viz.nextSong(); },
+
+  /* ---------- install as an app ---------- */
+  initInstall() {
+    const b = $('#btnInstall');
+    if (!b) return;
+    window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); Mobile.deferredInstall = e; b.hidden = false; });
+    window.addEventListener('appinstalled', () => { Mobile.deferredInstall = null; b.hidden = true; toast('Installed. Open Clawd Rdio from your home screen.'); });
+    if (Mobile.isIOS() && !Mobile.standalone()) b.hidden = false;
+    b.addEventListener('click', async () => {
+      const e = Mobile.deferredInstall;
+      if (e) { e.prompt(); try { await e.userChoice; } catch (err) { /* ignore */ } Mobile.deferredInstall = null; b.hidden = true; return; }
+      openModal('Add Clawd Rdio to your phone', h('div', { style: { display: 'flex', flexDirection: 'column', gap: '10px' } },
+        h('p', null, Mobile.isIOS()
+          ? 'In Safari, tap the Share button, then “Add to Home Screen”. It opens full screen like an app and keeps working without a connection.'
+          : 'In your browser’s menu choose “Install app” or “Add to Home screen”. It opens full screen like an app and keeps working without a connection.')), { width: 460 });
+    });
+  },
+
+  /* ---------- start ---------- */
+  init() {
+    // audio has to be started from a tap on phones; iOS wants touchend or click, and a sound played inside the tap
+    const unlock = () => {
+      const c = App.ctx;
+      if (!c) return;
+      if (c.state !== 'running') c.resume().catch(() => {});
+      try { const s = c.createBufferSource(); s.buffer = c.createBuffer(1, 1, 22050); s.connect(c.destination); s.start(0); } catch (e) { /* ignore */ }
+    };
+    for (const ev of ['touchend', 'click']) document.addEventListener(ev, unlock, { capture: true, passive: true });
+    // let sound play with the iPhone silent switch on
+    try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch (e) { /* ignore */ }
+    document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && App.tr && App.tr.playing) Mobile.wake(true); });
+
+    const nav = $('#mnav');
+    if (nav) nav.addEventListener('click', (e) => { const b = e.target.closest('button[data-go]'); if (b) Mobile.go(b.dataset.go); });
+    const on = (id, fn) => { const el = $(id); if (el) el.addEventListener('click', fn); };
+    on('#mbPlay', togglePlay);
+    on('#mbNext', () => Mobile.next());
+    on('#mbViz', () => Viz.show());
+    // choosing a track on the Tracks page opens it in the editor
+    const rack = $('#rackList');
+    if (rack) rack.addEventListener('click', (e) => {
+      if (Mobile.tab !== 'tracks' || !Mobile.isPhone()) return;
+      if (e.target.closest('.trk') && !e.target.closest('button, select, input, .hs')) setTimeout(() => Mobile.go('edit'), 0);
+    });
+    Mobile.go(local.get('nd84.mtab', 'play'), true);
+    Mobile.playing(false);
+    Mobile.initMedia();
+    Mobile.initInstall();
+    if ('serviceWorker' in navigator && /^https?:/.test(location.protocol) && document.querySelector('link[rel="manifest"]')) {
+      navigator.serviceWorker.register('sw.js').catch(() => { /* offline support is optional */ });
+    }
+  },
+});
+
+const MB_PLAY = '<svg viewBox="0 0 24 24"><path d="M7 4.5l12.5 7.5L7 19.5z"/></svg>';
+const MB_STOP = '<svg viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="1.5"/></svg>';
+
+/* ---- js/46-radio.js ---- */
+/* Clawd Rdio — radio mode, sleep timer, sing-along lyrics and "today's pick". */
+
+/* ---------- Radio: every song in shuffled order, with the station jingle between songs ---------- */
+const Radio = (ND.Radio = {
+  on: false, order: [], idx: -1, timer: null, idSrc: null, tok: 0,
+
+  shuffled() {
+    const keys = DEMOS.map((d) => d.key);
+    for (let i = keys.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [keys[i], keys[j]] = [keys[j], keys[i]]; }
+    if (keys[0] === App.lib.demoKey && keys.length > 1) keys.push(keys.shift());
+    return keys;
+  },
+  start() {
+    guardUnsaved(() => {
+      Radio.on = true; Radio.order = Radio.shuffled(); Radio.idx = -1;
+      if (Viz.playlist) { Viz.playlist = false; Viz.sync(); }
+      Radio.sync();
+      toast('Clawd Rdio is on the air: every song, shuffled.');
+      Radio.next(true);
+    });
+  },
+  off(quiet) {
+    if (!Radio.on) return;
+    Radio.on = false;
+    Radio.tok++;
+    Radio.stopJingle();
+    Radio.sync();
+    if (!quiet) toast('Radio off.');
+  },
+  toggle() { if (Radio.on) { Radio.off(); stopPlay(true); } else Radio.start(); },
+  skip() { if (Radio.on) Radio.next(false); },
+  prev() { if (Radio.on) { Radio.idx = Math.max(-1, Radio.idx - 2); Radio.next(false); } },
+  advance() { Radio.next(true); },
+  stopJingle() {
+    clearTimeout(Radio.timer);
+    if (Radio.idSrc) { Radio.idSrc.onended = null; try { Radio.idSrc.stop(); } catch (e) { /* ignore */ } Radio.idSrc = null; }
+    if (Lyrics.cur && Lyrics.cur.id === 'clawd-rdio-id') Lyrics.clear();
+  },
+  next(withId) {
+    Radio.stopJingle();
+    const tok = ++Radio.tok;
+    const go = () => {
+      if (!Radio.on || tok !== Radio.tok) return;
+      Radio.idx++;
+      if (Radio.idx >= Radio.order.length) { Radio.order = Radio.shuffled(); Radio.idx = 0; }
+      const d = DEMOS.find((x) => x.key === Radio.order[Radio.idx]);
+      if (!d) return Radio.next(false);
+      loadSong(d.build(), { demoKey: d.key, radio: true });
+      setMode('song');
+      startPlay();
+      if (Viz.open) { Viz.lastSec = -1; Viz.showCard(d.name); if (d.group === 'halloween') Viz.setSceneKey('haunted'); }
+      Radio.sync();
+    };
+    if (withId) Radio.jingle(go, tok); else go();
+  },
+  /* the sung station ID, played through the master bus so the volume knob applies */
+  jingle(done, tok) {
+    let called = false;
+    const once = () => { if (called) return; called = true; clearTimeout(Radio.timer); done(); };
+    if (!App.ensureAudio()) return once();
+    VocalBank.load('clawd-rdio-id').then((buf) => {
+      if (!buf || !Radio.on || tok !== Radio.tok) return once();
+      const c = App.ctx, src = c.createBufferSource(), g = c.createGain();
+      src.buffer = buf; g.gain.value = 1;
+      src.connect(g); g.connect(App.eng.sum);
+      Radio.idSrc = src;
+      src.onended = () => { Radio.idSrc = null; once(); };
+      src.start();
+      if (Viz.open) Viz.showCard('Clawd Rdio');
+      Lyrics.start('clawd-rdio-id');
+      Radio.timer = setTimeout(once, (buf.duration + 0.6) * 1000);
+    });
+  },
+  sync() {
+    for (const el of document.querySelectorAll('[data-radio]')) {
+      el.classList.toggle('on', Radio.on);
+      if (el.dataset.radio === 'label') el.textContent = Radio.on ? 'Radio: on' : 'Radio';
+    }
+    if (Viz.radioBtn) Viz.radioBtn.classList.toggle('on', Radio.on);
+  },
+});
+
+/* ---------- Sleep timer: fades the music out and stops ---------- */
+const Sleep = (ND.Sleep = {
+  until: 0, timer: null, tick: null,
+  set(min) {
+    Sleep.clear(true);
+    if (!min) { toast('Sleep timer off.'); Sleep.sync(); return; }
+    Sleep.until = Date.now() + min * 60000;
+    Sleep.timer = setTimeout(() => Sleep.fade(), min * 60000);
+    Sleep.tick = setInterval(() => Sleep.sync(), 20000);
+    toast('Sleep timer: the music will fade out in ' + min + ' minutes.');
+    Sleep.sync();
+  },
+  clear(quiet) {
+    clearTimeout(Sleep.timer); clearInterval(Sleep.tick);
+    Sleep.timer = Sleep.tick = null; Sleep.until = 0;
+    if (!quiet) Sleep.sync();
+  },
+  fade() {
+    const eng = App.eng;
+    Sleep.clear();
+    if (!eng || !App.tr.playing) return;
+    const t = App.ctx.currentTime;
+    eng.out.gain.cancelScheduledValues(t);
+    eng.out.gain.setValueAtTime(eng.out.gain.value, t);
+    eng.out.gain.linearRampToValueAtTime(0.0001, t + 12);
+    toast('Sleep timer: fading out…');
+    setTimeout(() => {
+      Radio.off(true);
+      stopPlay(true);
+      eng.out.gain.cancelScheduledValues(App.ctx.currentTime);
+      eng.out.gain.setValueAtTime(1, App.ctx.currentTime + 0.15);
+      toast('Good night. The sleep timer stopped the music.');
+    }, 12500);
+  },
+  minutesLeft() { return Sleep.until ? Math.max(1, Math.ceil((Sleep.until - Date.now()) / 60000)) : 0; },
+  sync() {
+    for (const el of document.querySelectorAll('[data-sleep]')) {
+      el.classList.toggle('on', !!Sleep.until);
+      el.textContent = Sleep.until ? 'Sleep: ' + Sleep.minutesLeft() + ' min' : 'Sleep timer';
+    }
+  },
+  menu(anchor) {
+    menuPop(anchor, [
+      { label: '15 minutes', run: () => Sleep.set(15) }, { label: '30 minutes', run: () => Sleep.set(30) },
+      { label: '60 minutes', run: () => Sleep.set(60) }, { label: '90 minutes', run: () => Sleep.set(90) },
+      { label: Sleep.until ? 'Turn off the timer' : 'No timer', run: () => Sleep.set(0) },
+    ]);
+  },
+});
+
+/* ---------- Lyrics: the sung line, in time with the clip ---------- */
+const Lyrics = (ND.Lyrics = {
+  cur: null,
+  /* a clip started playing: remember when, so line() can follow along */
+  start(id) {
+    const m = VocalBank.meta(id);
+    if (!m || !m.lyrics) return;
+    const lines = m.lyrics.split(' / ');
+    Lyrics.cur = { id, at: performance.now() / 1000, lines, per: (m.bars * 240 / m.bpm) / lines.length };
+  },
+  feed(hits) { for (const x of hits) if (x.clip) Lyrics.start(x.clip); },
+  clear() { Lyrics.cur = null; },
+  line() {
+    const c = Lyrics.cur;
+    if (!c) return '';
+    const e = performance.now() / 1000 - c.at;
+    if (e < 0 || e > c.per * c.lines.length + 0.5) return '';
+    return c.lines[Math.min(c.lines.length - 1, Math.floor(e / c.per))];
+  },
+  /* once per frame: show the current line in the player and the phone's mini player */
+  shown: '',
+  show() {
+    const line = Lyrics.line();
+    if (line === Lyrics.shown) return;
+    Lyrics.shown = line;
+    if (Viz.lyricEl) { Viz.lyricEl.textContent = line; Viz.lyricEl.classList.toggle('on', !!line); }
+  },
+});
+
+/* ---------- Today's pick: one song a day, the same for everyone ---------- */
+function todaysPick() {
+  const day = new Date().toISOString().slice(0, 10);
+  let hsh = 7;
+  for (let i = 0; i < day.length; i++) hsh = (hsh * 31 + day.charCodeAt(i)) >>> 0;
+  return DEMOS[hsh % DEMOS.length];
+}
+
+Object.assign(ND, { Radio, Sleep, Lyrics, todaysPick });
+
+/* ---- js/47-generator.js ---- */
+/* Clawd Rdio — "Surprise me": a seeded song generator. A seed picks a style, key, tempo and chord progression, then writes drums,
+   bass, pads, an arpeggio, a lead melody and extras into a full arrangement. The same seed always gives the same song, so a
+   seed is a tiny shareable song (#seed=1234). Melodies land on chord tones on the strong beats and step through the scale
+   in between, so they always sit in the key. */
+
+const Generator = (ND.Generator = {
+  rng(seed) {
+    let a = seed >>> 0;
+    return () => {
+      a = (a + 0x6d2b79f5) >>> 0;
+      let t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  },
+
+  /* degree lists are zero-based scale degrees; each progression is four chords of one bar each */
+  STYLES: [
+    { id: 'synthwave', style: 'Synthwave', scale: 'minor', bpm: [98, 114], kit: 'studio', bass: 'gallop', bassP: 'nightbass', padP: 'vapor', arpP: 'pluck', leadP: 'outrun', extraP: 'bells', swing: 0,
+      progs: [[0, 5, 2, 6], [0, 3, 6, 2], [0, 6, 5, 6], [0, 5, 3, 4]], arp: [0, 1, 2, 3, 2, 1],
+      drums: { verse: { BD: 'x...x...x...x...', SD: '....x.......x...', CH: 'x.x.x.x.x.x.x.x.' }, chorus: { BD: 'x...x...x...x...', SD: '....x.......x...', CP: '....x.......x...', CH: 'xoxoxoxoxoxoxoxo', OH: '..............x.' }, fill: { BD: 'x...x...x.......', SD: '....x.......xxXX', CH: 'x.x.x.x.x.x.....' } } },
+    { id: 'italo', style: 'Italo disco', scale: 'minor', bpm: [116, 126], kit: 'club', bass: 'octave', bassP: 'italo', padP: 'strings', arpP: 'arpglass', leadP: 'squarelead', extraP: 'stab', swing: 0,
+      progs: [[0, 6, 5, 6], [0, 3, 4, 0], [0, 5, 2, 6], [0, 2, 5, 4]], arp: [0, 2, 1, 3, 2, 1],
+      drums: { verse: { BD: 'x...x...x...x...', CH: '..x...x...x...x.', CP: '....x.......x...' }, chorus: { BD: 'x...x...x...x...', CP: '....x.......x...', CH: 'xoxoxoxoxoxoxoxo', OH: '..x...x...x...x.' }, fill: { BD: 'x...x...x...x...', SD: '..........x.xxXX', CP: '....x...........', CH: 'x.x.x.x.........' } } },
+    { id: 'synthpop', style: 'Synthpop', scale: 'major', bpm: [110, 128], kit: 'studio', bass: 'pulse', bassP: 'pulsebass', padP: 'epiano', arpP: 'marimba', leadP: 'staccato', extraP: 'brass', swing: 0,
+      progs: [[0, 4, 5, 3], [5, 3, 0, 4], [0, 5, 3, 4], [0, 3, 4, 3]], arp: [0, 1, 2, 1, 3, 2],
+      drums: { verse: { BD: 'x.....x.x.......', SD: '....x.......x...', CH: 'x.x.x.x.x.x.x.x.' }, chorus: { BD: 'x...x...x...x...', SD: '....x.......x...', CP: '....x.......x...', CH: 'x.x.x.x.x.x.x...', OH: '..............x.' }, fill: { BD: 'x.....x.x.......', SD: '....x.......xxXX', CH: 'x.x.x.x.x.x.....' } } },
+    { id: 'ballad', style: 'Power ballad', scale: 'major', bpm: [68, 82], kit: 'studio', bass: 'long', bassP: 'fretless', padP: 'strings', arpP: 'epiano', leadP: 'whistle', extraP: 'choir', swing: 0.05,
+      progs: [[0, 4, 5, 3], [0, 5, 3, 4], [0, 2, 3, 4], [5, 3, 0, 4]], arp: [0, 1, 2, 3, 2, 1, 2, 3],
+      drums: { verse: { BD: 'x.......x.x.....', SD: '....x.......x...', CH: 'x.x.x.x.x.x.x.x.' }, chorus: { BD: 'x.......x.x.....', SD: '....x.......x...', CP: '....x.......x...', CH: 'xoxoxoxoxoxoxoxo' }, fill: { BD: 'x.......x.x.....', SD: '....x.......x.xx', CH: 'x.x.x.x.x.x.....' } } },
+    { id: 'electro', style: 'Electro', scale: 'dorian', bpm: [118, 126], kit: 'hexagon', bass: 'syncopated', bassP: 'rubber', padP: 'glasspad', arpP: 'brightpoly', leadP: 'chiplead', extraP: 'zap', swing: 0.1,
+      progs: [[0, 0, 3, 0], [0, 6, 0, 4], [0, 3, 0, 6], [0, 4, 3, 0]], arp: [0, 2, 1, 3, 1, 2],
+      drums: { verse: { BD: 'x..x..x...x..x..', SD: '....x.......x...', CH: 'xxxxxxxxxxxxxxxx' }, chorus: { BD: 'x..x..x...x..x..', SD: '....x.......x...', CP: '....x.......x...', CH: 'xxxxxxxxxxxxxxxx', OH: '..x...x...x...x.' }, fill: { BD: 'x..x..x...x.....', SD: '....x...x.x.xxXX', CH: 'xxxxxxxxxxxx....' } } },
+  ],
+
+  ADJ: ['Neon', 'Midnight', 'Chrome', 'Velvet', 'Laser', 'Crystal', 'Electric', 'Turbo', 'Sunset', 'Digital', 'Cherry', 'Static', 'Holo', 'Ultra', 'Pastel', 'Violet', 'Cobalt', 'Silver'],
+  NOUN: ['Drive', 'Skyline', 'Heartbeat', 'Arcade', 'Mirage', 'Highway', 'Signal', 'Dreamer', 'Motel', 'Palace', 'Runner', 'Fever', 'Horizon', 'Echo', 'Cassette', 'Paradise', 'Hologram', 'Boulevard'],
+
+  nameFor(seed) {
+    const r = Generator.rng(seed * 7 + 3);
+    return Generator.ADJ[Math.floor(r() * Generator.ADJ.length)] + ' ' + Generator.NOUN[Math.floor(r() * Generator.NOUN.length)];
+  },
+
+  make(seed) {
+    const { mel, drums, times, build } = DSL;
+    const r = Generator.rng(seed);
+    const pick = (a) => a[Math.floor(r() * a.length)];
+    const st = Generator.STYLES[Math.floor(r() * Generator.STYLES.length)];
+    const root = pick([2, 3, 4, 5, 6, 7, 8, 9]);
+    const sc = SCALES[st.scale] || SCALES.minor;
+    const bpm = Math.round(st.bpm[0] + r() * (st.bpm[1] - st.bpm[0]));
+    const prog = pick(st.progs);
+    const n = sc.length;
+    // a pitch from a scale index (any octave) above the given octave's tonic
+    const at = (idx, oct) => 12 * (oct + 1) + root + sc[((idx % n) + n) % n] + 12 * Math.floor(idx / n);
+    const triad = (d) => [d, d + 2, d + 4];
+    const bar = (i) => i * 16;
+    const note = (s, nn, l, v) => ({ s, n: nn, l, v });
+
+    /* bass: one bar per chord, rhythm by style */
+    const bassNotes = [];
+    prog.forEach((d, b) => {
+      const o = bar(b), rt = at(d, 1), fifth = at(d + 4, 1);
+      if (st.bass === 'gallop') for (let g = 0; g < 4; g++) { bassNotes.push(note(o + g * 4, rt, 1, 0.9), note(o + g * 4 + 1, rt, 1, 0.55), note(o + g * 4 + 2, rt + 12, 1, 0.8), note(o + g * 4 + 3, rt, 1, 0.55)); }
+      else if (st.bass === 'octave') for (let i = 0; i < 8; i++) bassNotes.push(note(o + i * 2, rt + (i % 2 ? 12 : 0), 1, i % 2 ? 0.7 : 0.9));
+      else if (st.bass === 'pulse') for (let i = 0; i < 16; i += 2) bassNotes.push(note(o + i, rt, 1, i % 4 === 0 ? 0.9 : 0.6));
+      else if (st.bass === 'long') bassNotes.push(note(o, rt, 12, 0.85), note(o + 12, fifth, 4, 0.7));
+      else for (const [s, off, l] of [[0, 0, 2], [3, 0, 1], [6, 7, 1], [8, 0, 2], [11, 0, 1], [14, 12, 1]]) bassNotes.push(note(o + s, rt + off, l, 0.85));
+    });
+
+    /* pads: a held triad per bar */
+    const padNotes = [];
+    prog.forEach((d, b) => triad(d).forEach((k) => padNotes.push(note(bar(b), at(k, 3), 16, 0.7))));
+
+    /* arpeggio: chord tones stepped through, accent on the beat */
+    const arpNotes = [];
+    prog.forEach((d, b) => {
+      const tones = [at(d, 4), at(d + 2, 4), at(d + 4, 4), at(d, 5)];
+      for (let i = 0; i < 16; i++) arpNotes.push(note(bar(b) + i, tones[st.arp[i % st.arp.length]], 1, i % 4 === 0 ? 0.85 : 0.5));
+    });
+
+    /* lead: strong beats on chord tones, steps through the scale in between */
+    const RHYTHMS = [[4, 4, 4, 4], [6, 2, 4, 4], [2, 2, 4, 2, 2, 4], [4, 2, 2, 8], [3, 1, 4, 4, 4], [8, 4, 4], [2, 2, 2, 2, 8]];
+    const SPARSE = [[8, 8], [6, 2, 8], [12, 4], [4, 12], [8, 4, 4]];
+    const phrase = (rhythms, oct, density) => {
+      const out = [];
+      let ci = 7 + Math.floor(r() * 4) - 1;
+      prog.forEach((d, b) => {
+        const rh = pick(rhythms);
+        let s = 0;
+        rh.forEach((len, k) => {
+          const strong = s % 4 === 0 || len >= 4;
+          if (k > 0 && !strong && r() > density) { s += len; return; } // a rest
+          if (strong || k === 0) {
+            // nearest chord tone to the current index
+            let best = ci, bd = 99;
+            for (let c = Math.max(2, ci - 4); c <= Math.min(12, ci + 4); c++) { const m = (((c - d) % n) + n) % n; if ((m === 0 || m === 2 || m === 4) && Math.abs(c - ci) < bd) { bd = Math.abs(c - ci); best = c; } }
+            ci = best;
+          } else ci += pick([-1, -1, 1, 1, 2, -2]);
+          ci = Math.max(2, Math.min(12, ci));
+          out.push(note(bar(b) + s, at(ci, oct), Math.min(len, 16 - s), strong ? 0.85 : 0.65));
+          s += len;
+        });
+      });
+      return out;
+    };
+    const eight = (a, b) => ({ len: 128, notes: a.concat(b.map((x) => Object.assign({}, x, { s: x.s + 64 }))) });
+    const verseA = phrase(SPARSE, 5, 0.9), verseB = phrase(SPARSE, 5, 0.9);
+    const chorusA = phrase(RHYTHMS, 5, 0.85), chorusB = phrase(RHYTHMS, 5, 0.85);
+
+    /* drums */
+    const g = st.drums;
+    const dVerse = drums(times(g.verse, 7).concat([g.fill]));
+    const dChorus = drums([Object.assign({ CY: 'X...............' }, g.chorus)].concat(times(g.chorus, 6), [g.fill]));
+    const dIntro = drums(times({ CH: 'x.x.x.x.x.x.x.x.' }, 3).concat([{ CH: 'x.x.x.x.........', SD: '............xxXX' }]));
+    const dBridge = drums(times({ BD: 'x.........x.....', SD: '........X.......', CH: 'x.x.x.x.x.x.x.x.' }, 4));
+    const dEnd = drums([{ BD: 'X...............', CY: 'X...............' }, {}]);
+
+    const name = Generator.nameFor(seed);
+    const def = {
+      name, bpm, swing: st.swing, key: { root, scale: st.scale },
+      fx: { revSize: 0.6, revLvl: 0.45, dlyDiv: '1/8d', dlyFb: 0.35, dlyTone: 0.5, dlyLvl: 0.38, gateLvl: 0.7, comp: 0.45, vol: 0.8 },
+      tracks: [
+        { name: 'DRUMS', type: 'drum', kit: st.kit, color: '#ff5a36', vol: 0.78, rev: 0.05, voices: { SD: { gate: 0.7 }, CP: { lvl: 0.5, gate: 0.3 }, CH: { lvl: 0.4 }, OH: { lvl: 0.36 }, CY: { lvl: 0.4 } },
+          pats: { A: dVerse, B: dChorus, C: dIntro, D: dBridge, E: dEnd } },
+        { name: 'BASS', preset: st.bassP, color: '#3ce6ff', vol: 0.7, rev: 0.02, pats: { A: { len: 64, notes: bassNotes }, E: { len: 32, notes: [note(0, at(0, 1), 32, 0.9)] } } },
+        { name: 'PAD', preset: st.padP, color: '#b58cff', vol: 0.42, rev: 0.35, pats: { A: { len: 64, notes: padNotes } } },
+        { name: 'ARP', preset: st.arpP, color: '#5dffb4', vol: 0.4, rev: 0.22, dly: 0.28, pan: -0.2, pats: { A: { len: 64, notes: arpNotes } } },
+        { name: 'LEAD', preset: st.leadP, color: '#ff3d9a', vol: 0.6, rev: 0.28, dly: 0.3, pats: { A: eight(verseA, verseB), B: eight(chorusA, chorusB), C: { len: 64, notes: verseA } } },
+        { name: 'EXTRA', preset: st.extraP, color: '#ffd23a', vol: 0.4, rev: 0.3, dly: 0.2, pan: 0.2, pats: { A: { len: 64, notes: padNotes.map((x) => Object.assign({}, x, { n: x.n + 12 })) } } },
+      ],
+      sections: [
+        ['Intro', 4, { DRUMS: 'C', PAD: 'A', ARP: 'A' }],
+        ['Verse 1', 8, { DRUMS: 'A', BASS: 'A', PAD: 'A', ARP: 'A', LEAD: 'A' }],
+        ['Chorus 1', 8, { DRUMS: 'B', BASS: 'A', PAD: 'A', ARP: 'A', LEAD: 'B', EXTRA: 'A' }],
+        ['Verse 2', 8, { DRUMS: 'A', BASS: 'A', PAD: 'A', ARP: 'A', LEAD: 'A', EXTRA: 'A' }],
+        ['Chorus 2', 8, { DRUMS: 'B', BASS: 'A', PAD: 'A', ARP: 'A', LEAD: 'B', EXTRA: 'A' }],
+        ['Bridge', 4, { DRUMS: 'D', PAD: 'A', LEAD: 'C' }],
+        ['Final Chorus', 8, { DRUMS: 'B', BASS: 'A', PAD: 'A', ARP: 'A', LEAD: 'B', EXTRA: 'A' }],
+        ['Outro', 4, { DRUMS: 'C', BASS: 'A', PAD: 'A', ARP: 'A' }],
+        ['End', 2, { DRUMS: 'E', BASS: 'E', PAD: 'A' }],
+      ],
+    };
+    const song = build(def);
+    song.genSeed = seed;
+    song.style = st.style;
+    return song;
+  },
+
+  /* load a new random song and play it */
+  surprise(seed) {
+    seed = seed || 1000 + Math.floor(Math.random() * 9000);
+    guardUnsaved(() => {
+      Radio.off(true);
+      const song = Generator.make(seed);
+      loadSong(song, {});
+      App.lib.genSeed = seed;
+      setMode('song');
+      startPlay();
+      toast('“' + song.name + '” (' + song.style + ', ' + song.bpm + ' BPM). Tap Surprise me again for another. Save keeps it.');
+    });
+  },
+});
+
+/* ---- js/48-jam.js ---- */
+/* Clawd Rdio — Jam pads: big touch pads locked to the song's key, so every pad sounds right. Two rows of scale notes (this octave and
+   the next) and a row of chords built on each step of the scale. They play the selected track and can be recorded like the keys. */
+
+const Jam = (ND.Jam = {
+  held: new Map(),
+  ROMAN: ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII'],
+
+  /* phones start in Jam mode; elsewhere the piano keys are the default */
+  enabled() { return App.ui.jam === undefined ? Mobile.isPhone() : !!App.ui.jam; },
+
+  build() {
+    const host = $('#jam');
+    if (!host) return;
+    host.textContent = '';
+    const key = App.song.key, sc = SCALES[key.scale] || SCALES.minor, n = sc.length;
+    const base = 12 * (App.ui.oct + 1) + key.root;
+    const notes = Array.from({ length: n * 2 }, (_, i) => base + sc[i % n] + 12 * Math.floor(i / n));
+    const tone = (i) => (i < notes.length ? notes[i] : notes[i - n] + 12);
+    const pad = (cls, label, sub, ns) => h('button', { class: 'jam-pad ' + cls, 'data-notes': ns.join(','), 'aria-label': label + (sub ? ' ' + sub : '') }, h('b', null, label), sub ? h('i', null, sub) : null);
+    const row = (children) => h('div', { class: 'jam-row', style: { gridTemplateColumns: 'repeat(' + n + ', minmax(0, 1fr))' } }, ...children);
+    const scaleRow = (from) => row(Array.from({ length: n }, (_, k) => {
+      const i = from + k, m = notes[i];
+      return pad(k === 0 ? 'root' : '', NOTE_NAMES[m % 12], String(k + 1), [m]);
+    }));
+    const chords = row(Array.from({ length: n }, (_, d) => {
+      const ns = [tone(d), tone(d + 2), tone(d + 4)];
+      const minor = ns[1] - ns[0] === 3;
+      const sym = n === 7 ? (minor ? Jam.ROMAN[d].toLowerCase() : Jam.ROMAN[d]) : String(d + 1);
+      return pad('chord' + (d === 0 ? ' root' : ''), sym, NOTE_NAMES[ns[0] % 12] + (minor ? 'm' : ''), ns);
+    }));
+    host.append(
+      h('div', { class: 'jam-head' }, NOTE_NAMES[key.root] + ' ' + (SCALE_NAMES[key.scale] || key.scale) + ': every pad is in key. Pads on the left are the lowest.'),
+      scaleRow(n), scaleRow(0), chords);
+  },
+
+  press(id, btn, e) {
+    const ns = btn.dataset.notes.split(',').map(Number);
+    const r = btn.getBoundingClientRect();
+    const vel = clamp(0.5 + ((e.clientY - r.top) / Math.max(1, r.height)) * 0.5, 0.45, 1);
+    const srcs = ns.map((nn, k) => 'jam' + id + '-' + k);
+    ns.forEach((nn, k) => liveNoteOn(srcs[k], nn, vel));
+    btn.classList.add('down');
+    Jam.held.set(id, { btn, srcs });
+  },
+  release(id) {
+    const hd = Jam.held.get(id);
+    if (!hd) return;
+    Jam.held.delete(id);
+    hd.srcs.forEach((s) => liveNoteOff(s));
+    hd.btn.classList.remove('down');
+  },
+
+  init() {
+    const host = $('#jam');
+    if (!host) return;
+    host.addEventListener('pointerdown', (e) => {
+      const b = e.target.closest('.jam-pad');
+      if (!b) return;
+      e.preventDefault();
+      try { host.setPointerCapture(e.pointerId); } catch (err) { /* ignore */ }
+      Jam.press(e.pointerId, b, e);
+    });
+    host.addEventListener('pointermove', (e) => {
+      const hd = Jam.held.get(e.pointerId);
+      if (!hd) return;
+      const el = document.elementFromPoint(e.clientX, e.clientY);
+      const b = el && el.closest && el.closest('.jam-pad');
+      if (b && b !== hd.btn) { Jam.release(e.pointerId); Jam.press(e.pointerId, b, e); }
+    });
+    const end = (e) => Jam.release(e.pointerId);
+    host.addEventListener('pointerup', end);
+    host.addEventListener('pointercancel', end);
+    const btn = $('#jamBtn');
+    if (btn) btn.addEventListener('click', () => { App.ui.jam = !Jam.enabled(); renderKeys(); });
+  },
+});
+
+/* ---- js/49-share.js ---- */
+/* Clawd Rdio — sharing. Built-in songs and "Surprise me" songs share as short links (#song=… and #seed=…). A song you edited is
+   squeezed into the link itself (#s=…), so whoever opens it hears exactly what you made. On a phone the Share button opens the
+   system share sheet; elsewhere it copies the link. */
+
+const Share = (ND.Share = {
+  b64(bytes) {
+    let s = '';
+    for (let i = 0; i < bytes.length; i += 0x8000) s += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+    return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  },
+  unb64(str) {
+    const s = atob(str.replace(/-/g, '+').replace(/_/g, '/') + '==='.slice((str.length + 3) % 4));
+    const bytes = new Uint8Array(s.length);
+    for (let i = 0; i < s.length; i++) bytes[i] = s.charCodeAt(i);
+    return bytes;
+  },
+  async pack(song) {
+    const cs = new CompressionStream('deflate-raw');
+    const w = cs.writable.getWriter();
+    w.write(new TextEncoder().encode(JSON.stringify(song)));
+    w.close();
+    return Share.b64(new Uint8Array(await new Response(cs.readable).arrayBuffer()));
+  },
+  async unpack(str) {
+    if (str.length > 3000000) throw new Error('That link is too big.');
+    const ds = new DecompressionStream('deflate-raw');
+    const w = ds.writable.getWriter();
+    w.write(Share.unb64(str));
+    w.close();
+    return JSON.parse(await new Response(ds.readable).text());
+  },
+
+  base() { return location.href.split('#')[0].split('?')[0]; },
+  async link() {
+    if (App.lib.demoKey && !App.lib.dirty) return Share.base() + '#song=' + App.lib.demoKey;
+    if (App.lib.genSeed && !App.lib.dirty) return Share.base() + '#seed=' + App.lib.genSeed;
+    if (typeof CompressionStream === 'undefined') throw new Error('This browser cannot put an edited song in a link. Use Export to send the song file instead.');
+    return Share.base() + '#s=' + (await Share.pack(App.song));
+  },
+  async send() {
+    if (location.protocol === 'file:') { toast('Open Clawd Rdio from its web address to share a link, or use Export to send the song file.', true); return; }
+    try {
+      const url = await Share.link();
+      const title = App.song.name;
+      if (navigator.share) { await navigator.share({ title: title + ' on Clawd Rdio', text: 'Listen to “' + title + '” on Clawd Rdio', url }); return; }
+      try { await navigator.clipboard.writeText(url); } catch (e) { window.prompt('Copy this link', url); return; }
+      toast(url.length > 6000 ? 'Link copied. It is long (' + Math.round(url.length / 1024) + ' KB); if an app cuts it off, use Export instead.' : 'Link copied. Paste it anywhere to share “' + title + '”.');
+    } catch (e) {
+      if (e && e.name === 'AbortError') return;
+      toast('Could not make a link: ' + (e.message || e), true);
+    }
+  },
+
+  /* open a song from the address (#seed=… or #s=…) */
+  async openFromHash() {
+    const hash = location.hash || '';
+    let m = /(?:^#|&)seed=(\d{1,9})/.exec(hash);
+    if (m) {
+      const song = Generator.make(parseInt(m[1], 10));
+      loadSong(song, {});
+      App.lib.genSeed = parseInt(m[1], 10);
+      setMode('song');
+      toast('Opened “' + song.name + '”. Press Play.');
+      return true;
+    }
+    m = /(?:^#|&)s=([\w-]+)/.exec(hash);
+    if (m) {
+      try {
+        const song = sanitizeSong(await Share.unpack(m[1]));
+        loadSong(song, {});
+        App.lib.dirty = false;
+        setMode('song');
+        toast('Opened the shared song “' + song.name + '”. Press Play.');
+      } catch (e) { toast('That shared link could not be opened.', true); }
+      return true;
+    }
+    return false;
+  },
+});
+
+/* ---- js/50-features.js ---- */
+/* Clawd Rdio — wires the "extras" together: the phone's home card, Share, Surprise me, Radio, Sleep timer and Today's pick. */
+
+const Features = (ND.Features = {
+  playPick() {
+    const d = todaysPick();
+    guardUnsaved(() => { loadSong(d.build(), { demoKey: d.key }); setMode('song'); startPlay(); toast('Today’s pick: “' + d.name + '”.'); });
+  },
+
+  openShared() {
+    const run = () => Share.openFromHash().then((did) => { if (did) { try { history.replaceState(null, '', Share.base()); } catch (e) { /* ignore */ } } });
+    if (App.lib.dirty) guardUnsaved(run); else run();
+  },
+
+  init() {
+    const on = (sel, fn) => { const el = $(sel); if (el) el.addEventListener('click', fn); };
+    on('#btnShare', () => Share.send());
+    on('#homeShare', () => Share.send());
+    on('#homeRadio', () => Radio.toggle());
+    on('#homeSurprise', () => Generator.surprise());
+    on('#homeSleep', (e) => Sleep.menu(e.currentTarget));
+    on('#homeSongs', () => openLibrary());
+    on('#homeJam', () => { App.ui.jam = true; Mobile.go('keys'); });
+    on('#homePick', () => Features.playPick());
+    const d = todaysPick();
+    const nm = $('#homePickName'), mt = $('#homePickMeta');
+    if (nm) nm.textContent = d.name;
+    if (mt) mt.textContent = d.style + ' · ' + d.bpm + ' BPM · ' + fmtTime(demoSeconds(d));
+    Radio.sync();
+    Sleep.sync();
+    // a share link pasted into this tab while it is open
+    window.addEventListener('hashchange', () => { if (/(?:^#|&)(?:s|seed)=/.test(location.hash)) Features.openShared(); });
+    Jam.init();
+  },
+});
+
 /* ---- themes/01-nightdrive.js ---- */
 /* The original look. It has no variables of its own: it is whatever styles.css defines in :root. */
 Themes.register({
@@ -10927,6 +11860,8 @@ function openHelp() {
       h('div', null, h('b', null, 'Recording. '), 'Arm ', h('b', null, 'Rec'), ', press Play and play the keys: notes land on the nearest 16th in the selected track’s pattern for the playing part.'),
       h('div', null, h('b', null, 'Keys. '), k('Space'), ' play or stop, ', k('Esc'), ' stop, ', k('Z'), '–', k('M'), ' and ', k('Q'), '–', k('P'), ' play notes, ', k('-'), ' ', k('='), ' change octave, ', k('Shift'), ' plays louder.'),
       h('div', null, h('b', null, 'Editing. '), k('Ctrl'), '+', k('Z'), ' undo, ', k('Ctrl'), '+', k('Shift'), '+', k('Z'), ' redo, ', k('Ctrl'), '+', k('S'), ' save. Your work in progress is also kept automatically in this browser.'),
+      h('div', null, h('b', null, 'On a phone. '), 'Five pages behind the tab bar: Play, Parts, Tracks, Edit and Keys. On the Keys page the big pads are locked to the song’s key, so every tap sounds right; Rec records them. The Play page has Radio (every song, shuffled), Surprise me (a brand-new song), a sleep timer and today’s pick.'),
+      h('div', null, h('b', null, 'Share. '), 'Makes a link that opens this exact song for whoever you send it to. An edited song travels inside the link itself.'),
       h('div', null, h('b', null, 'Export. '), 'Render the song or the current part to a WAV file, or save the song file to open later or share.'),
       h('div', null, h('b', null, 'Visualizer. '), 'Full-screen light show for an audience: a sunset highway, falling notes on a keyboard, a neon tunnel and a vector scope, all driven by the notes being played. ', k('←'), ' ', k('→'), ' change scene, ', k('F'), ' full screen, ', k('Esc'), ' close. Playlist plays one song after another.')));
   openModal('How it works', body, { width: 780 });
@@ -10952,6 +11887,7 @@ function frame() {
     const cur = res.cur, fired = res.fired;
     hits = res.hits;
     if (fired.length) flashLEDs(fired, now);
+    if (hits.length) Lyrics.feed(hits);
     if (cur) {
       if (App.tr.mode === 'song' && App.ui.follow && cur.sec !== App.sel.section && App.song.sections[cur.sec]) {
         App.sel.section = cur.sec;
@@ -10965,8 +11901,10 @@ function frame() {
   if (App.tr.endTime != null && now > App.tr.endTime + 0.1) {
     stopPlay(false);
     App.selectSection(0);
-    if (Viz.open && Viz.playlist) Viz.nextSong(true);
+    if (Radio.on) Radio.advance();
+    else if (Viz.open && Viz.playlist) Viz.nextSong(true);
   }
+  Lyrics.show();
   for (const el of $$('.trk .act.hit')) if (el._off && now > el._off) el.classList.remove('hit');
   if (Viz.open) { Viz.frame(hits); return; }
   updateMeters();
@@ -10985,6 +11923,8 @@ function boot() {
     App.tr = { playing: false, queue: [], mode: 'loop', start() {}, stop() {}, consume() { return { cur: null, fired: [] }; } };
   }
   Themes.init();
+  Mobile.init();
+  Features.init();
   initArrangerControls();
   initTransport();
   initShortcuts();
@@ -11036,6 +11976,10 @@ function boot() {
   if (wd && App.lib.demoKey !== wd.key) {
     const open = () => { loadSong(wd.build(), { demoKey: wd.key }); setMode('song'); toast('Loaded “' + wd.name + '”. Press Play.'); };
     if (loaded && !draft.demoKey) { App.lib.dirty = true; guardUnsaved(open); } else open();
+  }
+  if (/(?:^#|&)(?:s|seed)=/.test(location.hash || '')) {
+    if (loaded && !draft.demoKey) App.lib.dirty = true;
+    Features.openShared();
   }
   App.updateUndo();
   initCapabilities();
