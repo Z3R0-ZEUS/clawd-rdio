@@ -657,11 +657,11 @@ html.viz-open, html.viz-open body { overflow: hidden; }
 /* visualizer: song panel and playlist */
 .viz-panel {
   position: absolute; right: 22px; top: calc(70px + env(safe-area-inset-top, 0px)); bottom: calc(86px + env(safe-area-inset-bottom, 0px));
-  width: min(430px, calc(100vw - 32px)); display: flex; flex-direction: column; cursor: default;
+  width: min(470px, calc(100vw - 32px)); display: flex; flex-direction: column; cursor: default;
   background: rgba(12,10,24,.92); border: 1px solid var(--line-hi); border-radius: 10px; box-shadow: 0 10px 40px rgba(0,0,0,.5);
 }
 .vp-tabs { display: flex; gap: 6px; padding: 8px; border-bottom: 1px solid var(--line); }
-.vp-tab { flex: 1; height: 34px; border-radius: 7px; border: 1px solid var(--line); background: var(--panel); color: var(--muted); font-family: var(--font-display); font-size: 10.5px; letter-spacing: .16em; }
+.vp-tab { flex: 1; min-width: 0; height: 34px; padding: 0 4px; border-radius: 7px; border: 1px solid var(--line); background: var(--panel); color: var(--muted); font-family: var(--font-display); font-size: 10.5px; letter-spacing: .1em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .vp-tab.on { color: var(--on); border-color: var(--neon); box-shadow: 0 0 0 1px var(--neon) inset; }
 .vp-x { width: 34px; height: 34px; border-radius: 7px; border: 1px solid var(--line); background: var(--panel); color: var(--fg); }
 .vp-body { flex: 1; overflow-y: auto; padding: 8px; display: flex; flex-direction: column; gap: 4px; overscroll-behavior: contain; }
@@ -689,6 +689,15 @@ html.viz-open, html.viz-open body { overflow: hidden; }
 @media (max-width: 720px) {
   .viz-panel { right: 12px; left: 12px; width: auto; top: calc(56px + env(safe-area-inset-top, 0px)); bottom: calc(132px + env(safe-area-inset-bottom, 0px)); }
 }
+
+/* visualizer: scene and effect switches */
+.vp-sw { position: relative; width: 38px; height: 22px; flex: none; border-radius: 11px; border: 1px solid var(--line-hi); background: var(--panel-lo, var(--panel)); cursor: pointer; padding: 0; }
+.vp-sw::after { content: ""; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%; background: var(--muted); transition: transform .15s, background .15s; }
+.vp-sw[aria-checked="true"] { border-color: var(--neon); }
+.vp-sw[aria-checked="true"]::after { transform: translateX(16px); background: var(--neon); box-shadow: 0 0 8px var(--neon); }
+.vp-row.sc.off .vp-nm { opacity: .5; }
+.vp-sc-tip { padding: 2px 4px 6px; line-height: 1.4; }
+.viz.no-info .viz-now, .viz.no-info .viz-clock { display: none; }
 
 /* themes dialog */
 .theme-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
@@ -4920,7 +4929,8 @@ function initShortcuts() {
       if (e.code === 'Escape') { e.preventDefault(); if (V.panelOpen) V.togglePanel(false); else V.close(); return; }
       if (e.code === 'KeyL') { e.preventDefault(); V.togglePanel(); V.poke(); return; }
       if (e.code === 'KeyN') { e.preventDefault(); V.nextSong(); V.poke(); return; }
-      if (e.code === 'ArrowRight' || e.code === 'ArrowLeft') { e.preventDefault(); V.setScene(V.scene + (e.code === 'ArrowRight' ? 1 : -1)); V.poke(); return; }
+      if (e.code === 'ArrowRight' || e.code === 'ArrowLeft') { e.preventDefault(); V.stepScene(e.code === 'ArrowRight' ? 1 : -1); V.poke(); return; }
+      if (e.code === 'KeyS') { e.preventDefault(); V.toggleScenes(); V.poke(); return; }
       if (e.code === 'KeyF') { e.preventDefault(); V.toggleFull(); return; }
     }
     if (e.ctrlKey || e.metaKey) {
@@ -6565,8 +6575,14 @@ const DRUM_VIZ = [
 
 const Viz = (ND.Viz = {
   open: false, scene: 0, auto: true, playlist: false, reduce: false,
-  SCENES: [{ key: 'outrun', name: 'Outrun' }, { key: 'keys', name: 'Keys' }, { key: 'tunnel', name: 'Tunnel' }, { key: 'scope', name: 'Scope' },
-    { key: 'skyline', name: 'Skyline' }, { key: 'lasers', name: 'Lasers' }, { key: 'hifi', name: 'Hi-Fi' }, { key: 'demo', name: 'Demo' }, { key: 'haunted', name: 'Graveyard' }, { key: 'halftone', name: 'Halftone' }],
+  SCENES: [{ key: 'outrun', name: 'Outrun', desc: 'Sunset highway' }, { key: 'keys', name: 'Keys', desc: 'Falling notes on a keyboard' }, { key: 'tunnel', name: 'Tunnel', desc: 'Neon tunnel that pulses with the drums' },
+    { key: 'scope', name: 'Scope', desc: 'Vector scope with a spectrum fan' }, { key: 'skyline', name: 'Skyline', desc: 'Neon city, windows light up with each note' }, { key: 'lasers', name: 'Lasers', desc: 'Laser show' },
+    { key: 'hifi', name: 'Hi-Fi', desc: 'Stereo deck with VU meters and an equalizer' }, { key: 'demo', name: 'Demo', desc: 'Demoscene plasma, spinning cube and scroller' }, { key: 'haunted', name: 'Graveyard', desc: 'Haunted graveyard (starts on its own for Halloween songs)' },
+    { key: 'halftone', name: 'Halftone', desc: 'Halftone dots in your theme\u2019s colors' },
+    { key: 'spectrum', name: 'Spectrum', desc: 'Neon equalizer bars with a mirror floor' }, { key: 'warp', name: 'Warp', desc: 'Fly through a starfield, kicks hit the throttle' },
+    { key: 'aurora', name: 'Aurora', desc: 'Northern lights over the mountains' }, { key: 'kaleido', name: 'Kaleido', desc: 'Kaleidoscope that every note paints' },
+    { key: 'fireworks', name: 'Fireworks', desc: 'Every note launches a rocket' }, { key: 'radial', name: 'Radial', desc: 'Circular spectrum and waveform ring' },
+    { key: 'rain', name: 'Rain', desc: 'Falling code, notes drop bright streaks' }, { key: 'lava', name: 'Lava', desc: 'Lava lamp blobs that swell with the music' }],
   env: { kick: 0, snare: 0, hat: 0, crash: 0, tom: 0, bass: 0, mid: 0, high: 0, level: 0 },
   bands: new Float32Array(48),
   pads: new Float32Array(12),
@@ -6592,8 +6608,9 @@ const Viz = (ND.Viz = {
     this.radioBtn = mk('RADIO', 'Clawd Rdio radio: every song shuffled, with the station jingle between songs', () => Radio.toggle(), 'txt');
     this.lyricEl = h('div', { class: 'viz-lyric', 'aria-live': 'off' });
     const controls = h('div', { class: 'viz-controls' },
-      mk(VIZ_ICONS.prev, 'Previous scene (Left arrow)', () => this.setScene(this.scene - 1)), this.sceneLab,
-      mk(VIZ_ICONS.fwd, 'Next scene (Right arrow)', () => this.setScene(this.scene + 1)),
+      mk(VIZ_ICONS.prev, 'Previous scene (Left arrow)', () => this.stepScene(-1)), this.sceneLab,
+      mk(VIZ_ICONS.fwd, 'Next scene (Right arrow)', () => this.stepScene(1)),
+      this.scenesBtn = mk('SCENES', 'Turn scenes and effects on or off (S)', () => this.toggleScenes(), 'txt'),
       h('span', { class: 'viz-sep' }), mk(VIZ_ICONS.prevSong, 'Previous song', () => this.prevSong()), this.playBtn, mk(VIZ_ICONS.next, 'Next song (N)', () => this.nextSong()), this.favBtn,
       this.autoBtn, this.listBtn, this.radioBtn, this.songsBtn = mk('SONGS', 'Pick songs and build a playlist (L)', () => this.togglePanel(), 'txt'), h('span', { class: 'viz-sep' }), this.fullBtn,
       mk(VIZ_ICONS.close, 'Close the visualizer (Esc)', () => this.close()));
@@ -6630,6 +6647,9 @@ const Viz = (ND.Viz = {
     const sg = sc.getContext('2d');
     sg.fillStyle = 'rgba(0,0,0,0.2)'; sg.fillRect(0, 2, 1, 1);
     this.scan = this.g.createPattern(sc, 'repeat');
+    this.loadPrefs();
+    if (this.off.has(this.SCENES[this.scene].key)) { const i = this.SCENES.findIndex((s) => !this.off.has(s.key)); if (i >= 0) this.scene = i; }
+    this.applyFx();
     this.setScene(this.scene);
   },
 
@@ -6686,6 +6706,7 @@ const Viz = (ND.Viz = {
     this.fade = 1;
     this.trail = null;
     this.rings.length = 0;
+    if (this.panelOpen && this.panelTab === 'scenes') this.renderPanel();
   },
 
   showCard(text) {
@@ -6822,15 +6843,25 @@ const Viz = (ND.Viz = {
     else if (key === 'demo') this.drawDemo(g, W, H, dt);
     else if (key === 'haunted') this.drawHaunted(g, W, H, dt);
     else if (key === 'halftone') this.drawHalftone(g, W, H, dt);
+    else if (key === 'spectrum') this.drawSpectrum(g, W, H, dt);
+    else if (key === 'warp') this.drawWarp(g, W, H, dt);
+    else if (key === 'aurora') this.drawAurora(g, W, H, dt);
+    else if (key === 'kaleido') this.drawKaleido(g, W, H, dt);
+    else if (key === 'fireworks') this.drawFireworks(g, W, H, dt);
+    else if (key === 'radial') this.drawRadial(g, W, H, dt);
+    else if (key === 'rain') this.drawRain(g, W, H, dt);
+    else if (key === 'lava') this.drawLava(g, W, H, dt);
     else this.drawScope(g, W, H);
     g.globalCompositeOperation = 'source-over';
     g.globalAlpha = 1;
     if (this.fade > 0) { g.fillStyle = 'rgba(0,0,0,' + this.fade.toFixed(3) + ')'; g.fillRect(0, 0, W, H); this.fade = Math.max(0, this.fade - dt * 2.4); }
-    if (!this.reduce && e.crash > 0.02) { g.fillStyle = 'rgba(255,255,255,' + (e.crash * 0.09).toFixed(3) + ')'; g.fillRect(0, 0, W, H); }
-    g.fillStyle = this.scan; g.fillRect(0, 0, W, H);
-    const vg = g.createRadialGradient(W / 2, H / 2, Math.min(W, H) * 0.35, W / 2, H / 2, Math.max(W, H) * 0.75);
-    vg.addColorStop(0, 'rgba(0,0,0,0)'); vg.addColorStop(1, 'rgba(0,0,0,0.5)');
-    g.fillStyle = vg; g.fillRect(0, 0, W, H);
+    if (this.fx.flash && !this.reduce && e.crash > 0.02) { g.fillStyle = 'rgba(255,255,255,' + (e.crash * 0.09).toFixed(3) + ')'; g.fillRect(0, 0, W, H); }
+    if (this.fx.scan) { g.fillStyle = this.scan; g.fillRect(0, 0, W, H); }
+    if (this.fx.vignette) {
+      const vg = g.createRadialGradient(W / 2, H / 2, Math.min(W, H) * 0.35, W / 2, H / 2, Math.max(W, H) * 0.75);
+      vg.addColorStop(0, 'rgba(0,0,0,0)'); vg.addColorStop(1, 'rgba(0,0,0,0.5)');
+      g.fillStyle = vg; g.fillRect(0, 0, W, H);
+    }
     this.updateHud(pos, nowP);
   },
 
@@ -7347,13 +7378,14 @@ Object.assign(Viz, {
     this.search = h('input', { class: 'txt vp-search', placeholder: 'Search songs, styles, composers…', 'aria-label': 'Search songs' });
     this.search.addEventListener('input', () => { this.filter = this.search.value.trim().toLowerCase(); this.renderPanel(); });
     this.search.addEventListener('keydown', (e) => { if (e.key === 'Escape') { e.stopPropagation(); this.togglePanel(false); } });
-    this.tabSongs = h('button', { class: 'vp-tab', onclick: () => { this.panelTab = 'songs'; this.renderPanel(); } }, 'ALL SONGS');
-    this.tabFavs = h('button', { class: 'vp-tab', onclick: () => { this.panelTab = 'favs'; this.renderPanel(); } }, '★ FAVORITES');
+    this.tabSongs = h('button', { class: 'vp-tab', onclick: () => { this.panelTab = 'songs'; this.renderPanel(); } }, 'SONGS');
+    this.tabFavs = h('button', { class: 'vp-tab', onclick: () => { this.panelTab = 'favs'; this.renderPanel(); } }, '★ FAVS');
     this.tabList = h('button', { class: 'vp-tab', onclick: () => { this.panelTab = 'list'; this.renderPanel(); } }, 'PLAYLIST');
+    this.tabScenes = h('button', { class: 'vp-tab', onclick: () => { this.panelTab = 'scenes'; this.renderPanel(); } }, 'SCENES');
     this.vpBody = h('div', { class: 'vp-body' });
     this.vpFoot = h('div', { class: 'vp-foot' });
     this.panel = h('div', { class: 'viz-panel', hidden: true, role: 'region', 'aria-label': 'Songs and playlist' },
-      h('div', { class: 'vp-tabs' }, this.tabSongs, this.tabFavs, this.tabList,
+      h('div', { class: 'vp-tabs' }, this.tabSongs, this.tabFavs, this.tabList, this.tabScenes,
         h('button', { class: 'vp-x', title: 'Close (L)', 'aria-label': 'Close the song panel', onclick: () => this.togglePanel(false) }, '✕')),
       this.vpBody, this.vpFoot);
     for (const ev of ['pointerdown', 'dblclick', 'wheel']) this.panel.addEventListener(ev, (e) => e.stopPropagation(), { passive: true });
@@ -7363,22 +7395,24 @@ Object.assign(Viz, {
     this.panelOpen = force == null ? !this.panelOpen : !!force;
     if (!this.panel) return;
     this.panel.hidden = !this.panelOpen;
-    if (this.songsBtn) this.songsBtn.classList.toggle('on', this.panelOpen);
+    if (this.songsBtn) this.songsBtn.classList.toggle('on', this.panelOpen && this.panelTab !== 'scenes');
+    if (this.scenesBtn) this.scenesBtn.classList.toggle('on', this.panelOpen && this.panelTab === 'scenes');
     this.renderPanel();
   },
   renderPanel() {
     if (!this.panel || !this.panelOpen) return;
     this.loadQueue();
-    const songsTab = this.panelTab === 'songs', favsTab = this.panelTab === 'favs';
+    const songsTab = this.panelTab === 'songs', favsTab = this.panelTab === 'favs', scenesTab = this.panelTab === 'scenes';
     this.tabSongs.classList.toggle('on', songsTab);
     this.tabFavs.classList.toggle('on', favsTab);
-    this.tabList.classList.toggle('on', !songsTab && !favsTab);
-    this.tabFavs.textContent = '★ FAVORITES' + (Favs.count() ? ' · ' + Favs.count() : '');
+    this.tabList.classList.toggle('on', !songsTab && !favsTab && !scenesTab);
+    this.tabScenes.classList.toggle('on', scenesTab);
+    this.tabFavs.textContent = '★ FAVS' + (Favs.count() ? ' · ' + Favs.count() : '');
     this.tabList.textContent = 'PLAYLIST' + (this.queue.length ? ' · ' + this.queue.length : '');
     const top = this.vpBody.scrollTop;
     this.vpBody.textContent = '';
     this.vpFoot.textContent = '';
-    if (songsTab) this.renderSongs(); else if (favsTab) this.renderFavs(); else this.renderQueue();
+    if (songsTab) this.renderSongs(); else if (favsTab) this.renderFavs(); else if (scenesTab) this.renderScenes(); else this.renderQueue();
     this.vpBody.scrollTop = top;
   },
   renderSongs() {
@@ -7470,12 +7504,18 @@ Object.assign(Viz, {
 
   /* ================= scene helpers ================= */
   autoScene() {
-    const d = this.demo(App.lib.demoKey);
-    const keys = d && d.group === 'halloween' ? ['haunted', 'lasers', 'tunnel', 'scope'] : this.SCENES.map((s) => s.key).filter((k) => k !== 'haunted');
+    this.loadPrefs();
+    const d = this.demo(App.lib.demoKey), on = (k) => !this.off.has(k);
+    let keys = (d && d.group === 'halloween' ? ['haunted', 'lasers', 'tunnel', 'scope'] : this.SCENES.map((s) => s.key).filter((k) => k !== 'haunted')).filter(on);
+    if (!keys.length) keys = this.SCENES.map((s) => s.key).filter(on);
+    if (!keys.length) return;
     const cur = keys.indexOf(this.SCENES[this.scene].key);
-    this.setSceneKey(keys[(cur + 1) % keys.length]);
+    this.setSceneKey(keys[(cur + 1) % keys.length], true);
   },
-  setSceneKey(k) {
+  /* force = go there even if that scene is switched off (picking it by hand) */
+  setSceneKey(k, force) {
+    this.loadPrefs();
+    if (!force && this.off.has(k)) return;
     const i = this.SCENES.findIndex((s) => s.key === k);
     if (i >= 0) this.setScene(i);
   },
@@ -8019,6 +8059,421 @@ Object.assign(Viz, {
       const px = clamp(((x.n - 30) / 70) * W, 0, W), py = (1 - clamp(x.v, 0, 1)) * H * 0.6 + H * 0.1;
       g.beginPath(); g.arc(px, py, cs * (0.5 + x.v * 0.9), 0, tau); g.fill();
     }
+  },
+});
+
+/* ---- visualizer: scene and effect switches, plus eight more scenes ---- */
+Object.assign(Viz, {
+  FX: [
+    ['scan', 'Scanlines', 'Thin CRT lines over the picture'],
+    ['vignette', 'Dark edges', 'Darkens the corners of the screen'],
+    ['flash', 'Cymbal flash', 'A white flash on every crash cymbal'],
+    ['info', 'Song title and clock', 'The now-playing text on screen'],
+  ],
+  off: new Set(), fx: { scan: true, vignette: true, flash: true, info: true }, prefsLoaded: false,
+
+  /* ================= which scenes and effects are on (remembered on this device) ================= */
+  loadPrefs() {
+    if (this.prefsLoaded) return;
+    this.prefsLoaded = true;
+    const off = local.get('nd84.vizoff', []);
+    this.off = new Set(Array.isArray(off) ? off.filter((k) => this.SCENES.some((s) => s.key === k)) : []);
+    if (this.off.size >= this.SCENES.length) this.off.clear();
+    const fx = local.get('nd84.vizfx', null);
+    if (fx && typeof fx === 'object') for (const [k] of this.FX) if (typeof fx[k] === 'boolean') this.fx[k] = fx[k];
+  },
+  savePrefs() {
+    local.set('nd84.vizoff', [...this.off]);
+    local.set('nd84.vizfx', this.fx);
+  },
+  sceneOff(key) { this.loadPrefs(); return this.off.has(key); },
+  applyFx() { if (this.el) this.el.classList.toggle('no-info', !this.fx.info); },
+
+  /* next or previous scene that is switched on */
+  stepScene(d) {
+    this.loadPrefs();
+    const n = this.SCENES.length;
+    let i = this.scene;
+    for (let k = 0; k < n; k++) {
+      i = (((i + d) % n) + n) % n;
+      if (!this.off.has(this.SCENES[i].key)) break;
+    }
+    if (i !== this.scene) this.setScene(i);
+  },
+  toggleScene(key) {
+    this.loadPrefs();
+    if (this.off.has(key)) this.off.delete(key);
+    else {
+      if (this.off.size >= this.SCENES.length - 1) { toast('Keep at least one scene on.', true); return; }
+      this.off.add(key);
+      if (this.SCENES[this.scene].key === key) this.stepScene(1);
+    }
+    this.savePrefs();
+    this.renderPanel();
+  },
+  toggleFx(k) {
+    this.loadPrefs();
+    this.fx[k] = !this.fx[k];
+    this.applyFx();
+    this.savePrefs();
+    this.renderPanel();
+  },
+  toggleScenes() {
+    if (this.panelOpen && this.panelTab === 'scenes') { this.togglePanel(false); return; }
+    this.panelTab = 'scenes';
+    this.togglePanel(true);
+  },
+  renderScenes() {
+    this.loadPrefs();
+    const cur = this.SCENES[this.scene].key, count = this.SCENES.length - this.off.size;
+    const sw = (on, label, fn) => h('button', { class: 'vp-sw', role: 'switch', 'aria-checked': String(on), 'aria-label': label, title: on ? 'On. Click to turn off' : 'Off. Click to turn on', onclick: fn });
+    this.vpBody.append(h('p', { class: 'vp-tip vp-sc-tip' }, 'Scenes that are off are skipped by the arrow keys and by AUTO. Click a name to jump to that scene.'));
+    for (const s of this.SCENES) {
+      const on = !this.off.has(s.key), here = s.key === cur;
+      this.vpBody.append(h('div', { class: 'vp-row sc' + (on ? '' : ' off') + (here ? ' cur' : '') },
+        sw(on, s.name, () => this.toggleScene(s.key)),
+        h('button', { class: 'vp-song', title: 'Show ' + s.name + ' now', onclick: () => { this.setSceneKey(s.key, true); this.poke(); } },
+          h('span', { class: 'vp-nm' }, (here ? '♪ ' : '') + s.name), h('span', { class: 'vp-meta' }, s.desc))));
+    }
+    this.vpBody.append(h('div', { class: 'vp-group' }, h('span', { class: 'vp-glab' }, 'EFFECTS')));
+    for (const [k, name, desc] of this.FX) {
+      this.vpBody.append(h('div', { class: 'vp-row sc' + (this.fx[k] ? '' : ' off') },
+        sw(this.fx[k], name, () => this.toggleFx(k)),
+        h('button', { class: 'vp-song', onclick: () => this.toggleFx(k) }, h('span', { class: 'vp-nm' }, name), h('span', { class: 'vp-meta' }, desc))));
+    }
+    this.vpFoot.append(
+      h('button', { class: 'vbtn txt', onclick: () => { this.off.clear(); this.savePrefs(); this.renderPanel(); } }, 'ALL ON'),
+      h('button', { class: 'vbtn txt', title: 'Turn off every scene except the one on screen', onclick: () => { this.off = new Set(this.SCENES.map((s) => s.key).filter((k) => k !== cur)); this.savePrefs(); this.renderPanel(); } }, 'ONLY THIS ONE'),
+      h('span', { class: 'vp-tip' }, count + ' of ' + this.SCENES.length + ' scenes on'));
+  },
+
+  /* ================= helpers for the new scenes ================= */
+  /* A second canvas that keeps the last picture and fades it, for glowing trails (the scanlines and shading go on top, not into the trail). */
+  trailLayer(W, H, fade) {
+    if (!this.trail) {
+      this.trail = document.createElement('canvas');
+      this.trail.width = this.canvas.width; this.trail.height = this.canvas.height;
+      this.tg = this.trail.getContext('2d');
+    }
+    const tg = this.tg;
+    tg.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
+    tg.globalCompositeOperation = 'source-over';
+    tg.globalAlpha = 1;
+    tg.fillStyle = fade; tg.fillRect(0, 0, W, H);
+    return tg;
+  },
+  showTrail(g, W, H, bg) {
+    g.fillStyle = bg; g.fillRect(0, 0, W, H);
+    g.drawImage(this.trail, 0, 0, W, H);
+  },
+  glow(g, x, y, r, rgb, a) {
+    const gr = g.createRadialGradient(x, y, 0, x, y, r);
+    gr.addColorStop(0, 'rgba(' + rgb + ',' + a.toFixed(3) + ')'); gr.addColorStop(1, 'rgba(' + rgb + ',0)');
+    g.fillStyle = gr; g.fillRect(x - r, y - r, r * 2, r * 2);
+  },
+
+  /* ================= scene 11: spectrum bars ================= */
+  drawSpectrum(g, W, H, dt) {
+    const e = this.env, B = this.bands.length, base = Math.round(H * 0.66), maxH = H * 0.5;
+    const sky = g.createLinearGradient(0, 0, 0, H);
+    sky.addColorStop(0, '#06020f'); sky.addColorStop(base / H, '#240a38'); sky.addColorStop(Math.min(1, base / H + 0.002), '#0a0414'); sky.addColorStop(1, '#030107');
+    g.fillStyle = sky; g.fillRect(0, 0, W, H);
+    g.globalCompositeOperation = 'lighter';
+    this.glow(g, W / 2, base, W * 0.55, '255,61,154', 0.14 + e.level * 0.2 + e.kick * 0.1);
+    g.globalCompositeOperation = 'source-over';
+    if (!this.specPk || this.specPk.length !== B) this.specPk = new Float32Array(B);
+    const gap = Math.max(2, W * 0.003), bw = (W * 0.92) / B - gap, x0 = W * 0.04;
+    for (let b = 0; b < B; b++) {
+      const v = Math.pow(this.bands[b], 1.35), bh = 3 + v * maxH, x = x0 + b * (bw + gap), hue = 330 - (b / B) * 150;
+      this.specPk[b] = Math.max(this.specPk[b] - dt * (this.reduce ? 0.3 : 0.55), v);
+      const gr = g.createLinearGradient(0, base - bh, 0, base);
+      gr.addColorStop(0, 'hsl(' + hue + ',100%,72%)'); gr.addColorStop(1, 'hsl(' + hue + ',100%,46%)');
+      g.fillStyle = gr; g.fillRect(x, base - bh, bw, bh);
+      g.fillStyle = 'hsla(' + hue + ',100%,55%,0.2)'; g.fillRect(x, base + 3, bw, Math.min(bh * 0.5, H - base - 6));
+      g.fillStyle = 'hsl(' + hue + ',100%,88%)'; g.fillRect(x, base - 8 - this.specPk[b] * maxH, bw, 3);
+    }
+    g.fillStyle = 'rgba(124,247,212,0.55)'; g.fillRect(0, base, W, 2);
+  },
+
+  /* ================= scene 12: warp speed ================= */
+  warpStar(init, c, near) {
+    const a = Math.random() * 6.283, r = near ? 0.1 + Math.random() * 0.4 : 0.06 + Math.random() * 1.4;
+    return { x: Math.cos(a) * r, y: Math.sin(a) * r, z: init ? 0.05 + Math.random() * 0.95 : 0.9 + Math.random() * 0.1, sp: Math.random(), c: c || ['#cfe0ff', '#ffffff', '#ffc6ec', '#b8f6ff'][Math.floor(Math.random() * 4)] };
+  },
+  drawWarp(g, W, H, dt) {
+    const e = this.env, cx = W / 2, cy = H / 2, S = Math.min(W, H) * 0.55;
+    if (!this.warp) { this.warp = Array.from({ length: 300 }, () => this.warpStar(true)); this.warpI = 0; }
+    g.globalAlpha = 1; g.fillStyle = '#02010a'; g.fillRect(0, 0, W, H);
+    g.globalCompositeOperation = 'lighter';
+    this.glow(g, cx, cy, Math.min(W, H) * 0.7, '110,80,255', 0.1 + e.level * 0.22);
+    const speed = this.reduce ? 0.05 + e.level * 0.15 : 0.16 + e.level * 0.9 + e.kick * 1.3;
+    for (const x of this.fresh.slice(0, 6)) this.warp[this.warpI++ % this.warp.length] = this.warpStar(false, x.c, true);
+    g.lineCap = 'round';
+    for (const s of this.warp) {
+      const step = dt * speed * (0.5 + s.sp);
+      s.z -= step;
+      if (s.z <= 0.03) { Object.assign(s, this.warpStar(false)); continue; }
+      const k = S / s.z, px = cx + s.x * k, py = cy + s.y * k;
+      if (px < -60 || px > W + 60 || py < -60 || py > H + 60) { Object.assign(s, this.warpStar(false)); continue; }
+      const k1 = S / (s.z + (0.012 + speed * 0.05) * (0.5 + s.sp));
+      g.globalAlpha = clamp(1.05 - s.z, 0.05, 1);
+      g.strokeStyle = s.c; g.lineWidth = 0.6 + (1 - s.z) * 2.6;
+      g.beginPath(); g.moveTo(cx + s.x * k1, cy + s.y * k1); g.lineTo(px, py); g.stroke();
+    }
+    if (e.kick > 0.05) {
+      g.globalAlpha = e.kick * 0.55; g.strokeStyle = '#7cf7d4'; g.lineWidth = 2 + e.kick * 4;
+      g.beginPath(); g.arc(cx, cy, (1 - e.kick) * Math.min(W, H) * 0.62, 0, 6.283); g.stroke();
+    }
+    g.globalAlpha = 1; g.lineCap = 'butt'; g.globalCompositeOperation = 'source-over';
+  },
+
+  /* ================= scene 13: aurora ================= */
+  drawAurora(g, W, H, dt) {
+    const e = this.env, B = this.bands.length, t = this.t * (this.reduce ? 0.25 : 1);
+    if (!this.auroraStrips) {
+      this.auroraStrips = [150, 172, 285, 325].map((hue) => {
+        const c = document.createElement('canvas');
+        c.width = 1; c.height = 64;
+        const k = c.getContext('2d'), gr = k.createLinearGradient(0, 0, 0, 64);
+        gr.addColorStop(0, 'hsla(' + hue + ',95%,70%,0)'); gr.addColorStop(0.07, 'hsla(' + hue + ',95%,68%,0.95)');
+        gr.addColorStop(0.35, 'hsla(' + hue + ',90%,55%,0.4)'); gr.addColorStop(1, 'hsla(' + (hue + 25) + ',90%,45%,0)');
+        k.fillStyle = gr; k.fillRect(0, 0, 1, 64);
+        return c;
+      });
+    }
+    const sky = g.createLinearGradient(0, 0, 0, H);
+    sky.addColorStop(0, '#02030c'); sky.addColorStop(0.6, '#07142a'); sky.addColorStop(1, '#0c2a3a');
+    g.fillStyle = sky; g.fillRect(0, 0, W, H);
+    for (const s of this.stars) {
+      const a = Math.min(1, s.b * (0.4 + 0.35 * Math.sin(this.t * 1.1 + s.tw)) + e.hat * 0.3);
+      g.fillStyle = 'rgba(235,245,255,' + Math.max(0, a).toFixed(3) + ')';
+      g.fillRect(s.x * W, s.y * H * 0.7, s.s, s.s);
+    }
+    g.globalCompositeOperation = 'lighter';
+    const step = Math.max(3, Math.round(W / 220));
+    for (let L = 0; L < 4; L++) {
+      const strip = this.auroraStrips[L];
+      for (let x = 0; x < W + step; x += step) {
+        const u = x / W, band = this.bands[Math.min(B - 1, Math.floor(u * B))];
+        const top = H * (0.14 + 0.07 * L) + Math.sin(u * 3.1 + t * 0.35 + L * 1.9) * H * 0.07 + Math.sin(u * 8 - t * 0.5 + L * 0.7) * H * 0.025;
+        const len = H * (0.16 + 0.1 * L + band * 0.34 + e.level * 0.12 + e.kick * 0.04);
+        const rays = 0.6 + 0.4 * Math.sin(u * 40 + t * 1.7 + L * 3);
+        g.globalAlpha = clamp((0.12 + band * 0.5 + e.level * 0.15) * rays * (1 - L * 0.12), 0, 0.9);
+        g.drawImage(strip, 0, 0, 1, 64, x, top, step + 1, len);
+      }
+    }
+    g.globalAlpha = 1; g.globalCompositeOperation = 'source-over';
+    const gy = Math.round(H * 0.84);
+    ['#050b16', '#02060d'].forEach((col, i) => {
+      const r = this.ridges[i];
+      g.fillStyle = col; g.beginPath(); g.moveTo(0, H); g.lineTo(0, gy - r[0][1] * H * 1.7);
+      for (const p of r) g.lineTo(p[0] * W, gy - p[1] * H * 1.7);
+      g.lineTo(W, H); g.closePath(); g.fill();
+    });
+  },
+
+  /* ================= scene 14: kaleidoscope ================= */
+  drawKaleido(g, W, H, dt) {
+    const e = this.env, cx = W / 2, cy = H / 2, S = Math.min(W, H) * 0.5, tau = Math.PI * 2, B = this.bands.length;
+    if (!this.kal) this.kal = [];
+    const K = this.kal;
+    for (const x of this.fresh) {
+      if (K.length > 110) break;
+      K.push({ a: ((x.n % 12) / 12) * 0.38 + 0.01, r: 0.14, vr: 0.2 + x.v * 0.35, s: 0.022 + x.v * 0.03, c: x.c || '#ff3d9a', life: 1, spin: (Math.random() - 0.5) * 0.6 });
+    }
+    for (const x of this.freshDrums) {
+      if (K.length > 130) break;
+      const kick = x.n === 0, c = DRUM_VIZ[x.n] ? DRUM_VIZ[x.n][1] : '#ffffff';
+      for (let k = 0; k < (kick ? 3 : 2); k++) K.push({ a: Math.random() * 0.4, r: 0.1, vr: kick ? 0.5 : 0.8, s: kick ? 0.06 : 0.02, c, life: 1, spin: 0 });
+    }
+    for (let i = K.length - 1; i >= 0; i--) {
+      const p = K[i];
+      p.r += p.vr * dt * (0.6 + e.level * 1.2); p.a += p.spin * dt * 0.2; p.life -= dt * 0.38;
+      if (p.life <= 0 || p.r > 1.25) K.splice(i, 1);
+    }
+    const tg = this.trailLayer(W, H, 'rgba(3,1,10,' + (this.reduce ? 0.6 : 0.16) + ')');
+    tg.globalCompositeOperation = 'lighter';
+    const rot = this.reduce ? 0 : this.t * 0.12 + e.bass * 0.15;
+    for (let k = 0; k < 16; k++) {
+      tg.save();
+      tg.translate(cx, cy); tg.rotate(rot + Math.floor(k / 2) * (tau / 8));
+      if (k % 2) tg.scale(1, -1);
+      for (const p of K) {
+        const R = p.r * S, x = Math.cos(p.a) * R, y = Math.sin(p.a) * R, s = p.s * S * (0.5 + p.life * 0.5);
+        tg.globalAlpha = Math.min(0.55, p.life * 0.6);
+        tg.fillStyle = p.c;
+        tg.beginPath(); tg.moveTo(x + s, y); tg.lineTo(x, y + s * 0.6); tg.lineTo(x - s, y); tg.lineTo(x, y - s * 0.6); tg.closePath(); tg.fill();
+      }
+      tg.restore();
+    }
+    this.showTrail(g, W, H, '#03010a');
+    g.globalCompositeOperation = 'lighter';
+    const cr = S * (0.1 + e.bass * 0.12 + e.kick * 0.08);
+    this.glow(g, cx, cy, cr * 2.6, '255,100,200', 0.25 + e.level * 0.25);
+    g.lineWidth = 2; g.lineCap = 'round';
+    for (let j = 0; j < B * 2; j++) {
+      const v = this.bands[j < B ? j : B * 2 - 1 - j], a = rot + (j / (B * 2)) * tau, r0 = cr * 1.5, r1 = r0 + v * S * 0.28 + 2;
+      g.strokeStyle = 'hsla(' + (330 - (j < B ? j : B * 2 - 1 - j) * 3) + ',100%,65%,' + (0.35 + v * 0.6).toFixed(3) + ')';
+      g.beginPath(); g.moveTo(cx + Math.cos(a) * r0, cy + Math.sin(a) * r0); g.lineTo(cx + Math.cos(a) * r1, cy + Math.sin(a) * r1); g.stroke();
+    }
+    g.lineCap = 'butt'; g.globalCompositeOperation = 'source-over';
+  },
+
+  /* ================= scene 15: fireworks ================= */
+  fwBurst(x, y, c, v, n, ring) {
+    const S = this.fwS, sp = Math.min(this.W, this.H) * (0.22 + clamp(v, 0, 1) * 0.3), cnt = this.reduce ? Math.ceil(n / 2) : n;
+    for (let i = 0; i < cnt && S.length < 900; i++) {
+      const a = ring ? (i / cnt) * 6.283 : Math.random() * 6.283, s = ring ? sp : sp * (0.25 + Math.random() * 0.75);
+      S.push({ x, y, px: x, py: y, vx: Math.cos(a) * s, vy: Math.sin(a) * s, c, life: 1, decay: 0.55 + Math.random() * 0.7 });
+    }
+  },
+  drawFireworks(g, W, H, dt) {
+    const e = this.env, grav = H * 0.8;
+    if (!this.fwR) { this.fwR = []; this.fwS = []; }
+    const R = this.fwR, S = this.fwS;
+    for (const x of this.fresh.slice(0, 3)) {
+      if (R.length > 40) break;
+      const t = clamp((x.n - 36) / 60, 0, 1), v = clamp(x.v, 0, 1);
+      R.push({ x: W * (0.08 + 0.84 * t) + (Math.random() - 0.5) * W * 0.05, y: H + 6, px: 0, py: 0, vx: (Math.random() - 0.5) * W * 0.04, vy: -H * (0.85 + v * 0.25 + Math.random() * 0.05), c: x.c || '#ff3d9a', v, big: x.l >= 8 });
+    }
+    for (const x of this.freshDrums) {
+      if (x.n === 0) this.fwBurst(W * (0.25 + Math.random() * 0.5), H * (0.18 + Math.random() * 0.25), '#ffd23a', 0.9, 40, true);
+      else if (x.n === 1 || x.n === 2) this.fwBurst(W * (0.1 + Math.random() * 0.8), H * (0.1 + Math.random() * 0.3), '#3ce6ff', 0.35, 14);
+      else if (x.n === 10) for (let k = 0; k < 3; k++) this.fwBurst(W * (0.2 + Math.random() * 0.6), H * (0.12 + Math.random() * 0.25), '#ffffff', 1, 36);
+    }
+    for (let i = R.length - 1; i >= 0; i--) {
+      const r = R[i];
+      r.px = r.x; r.py = r.y; r.vy += grav * dt; r.x += r.vx * dt; r.y += r.vy * dt;
+      if (r.vy >= -H * 0.05) { this.fwBurst(r.x, r.y, r.c, r.v, 26 + (r.big ? 24 : 0) + Math.round(r.v * 20)); R.splice(i, 1); }
+    }
+    for (let i = S.length - 1; i >= 0; i--) {
+      const s = S[i];
+      s.px = s.x; s.py = s.y; s.vx *= Math.max(0, 1 - 1.4 * dt); s.vy = s.vy * Math.max(0, 1 - 1.4 * dt) + grav * 0.3 * dt;
+      s.x += s.vx * dt; s.y += s.vy * dt; s.life -= dt * s.decay;
+      if (s.life <= 0) S.splice(i, 1);
+    }
+    const tg = this.trailLayer(W, H, 'rgba(3,1,9,' + (this.reduce ? 0.6 : 0.2) + ')');
+    tg.globalCompositeOperation = 'lighter'; tg.lineCap = 'round';
+    tg.strokeStyle = '#fff3cf'; tg.lineWidth = 3; tg.globalAlpha = 1;
+    tg.beginPath();
+    for (const r of R) { tg.moveTo(r.px, r.py); tg.lineTo(r.x, r.y); }
+    tg.stroke();
+    tg.lineWidth = 2.8;
+    for (const s of S) {
+      tg.globalAlpha = Math.min(1, s.life * 1.3);
+      tg.strokeStyle = s.c;
+      tg.beginPath(); tg.moveTo(s.px, s.py); tg.lineTo(s.x, s.y); tg.stroke();
+    }
+    this.showTrail(g, W, H, '#03010a');
+    g.globalCompositeOperation = 'lighter';
+    this.glow(g, W / 2, H, W * 0.6, '255,61,154', 0.06 + e.bass * 0.16);
+    g.globalCompositeOperation = 'source-over';
+  },
+
+  /* ================= scene 16: radial spectrum ================= */
+  drawRadial(g, W, H, dt) {
+    const e = this.env, B = this.bands.length, N = B * 2, cx = W / 2, cy = H / 2, tau = Math.PI * 2;
+    const R0 = Math.min(W, H) * (0.19 + e.bass * 0.035 + e.kick * 0.03), maxL = Math.min(W, H) * 0.26, rot = this.reduce ? 0 : this.t * 0.18;
+    const tg = this.trailLayer(W, H, 'rgba(4,2,12,' + (this.reduce ? 0.55 : 0.22) + ')');
+    tg.globalCompositeOperation = 'lighter'; tg.lineCap = 'round';
+    tg.lineWidth = Math.max(2.5, (R0 * tau / N) * 0.55);
+    for (let i = 0; i < N; i++) {
+      const j = i < B ? i : N - 1 - i, v = this.bands[j], a = rot + (i / N) * tau - Math.PI / 2, len = 3 + Math.pow(v, 1.2) * maxL;
+      tg.strokeStyle = 'hsla(' + (330 - j * 3.2) + ',100%,62%,' + (0.5 + v * 0.45).toFixed(3) + ')';
+      tg.beginPath(); tg.moveTo(cx + Math.cos(a) * R0, cy + Math.sin(a) * R0); tg.lineTo(cx + Math.cos(a) * (R0 + len), cy + Math.sin(a) * (R0 + len)); tg.stroke();
+    }
+    if (this.wave) {
+      const P = 192, stride = Math.floor(this.wave.length / P);
+      tg.strokeStyle = 'rgba(124,247,255,0.9)'; tg.lineWidth = 2;
+      tg.beginPath();
+      for (let i = 0; i <= P; i++) {
+        const a = rot + (i / P) * tau, r = R0 * 0.78 + (this.wave[(i % P) * stride] || 0) * R0 * 0.9;
+        if (i) tg.lineTo(cx + Math.cos(a) * r, cy + Math.sin(a) * r); else tg.moveTo(cx + Math.cos(a) * r, cy + Math.sin(a) * r);
+      }
+      tg.stroke();
+    }
+    this.showTrail(g, W, H, '#04020c');
+    g.globalCompositeOperation = 'lighter';
+    this.glow(g, cx, cy, R0 * 1.1, '255,100,200', 0.2 + e.level * 0.35 + e.kick * 0.2);
+    g.globalCompositeOperation = 'source-over';
+    g.strokeStyle = 'rgba(124,247,212,' + (0.25 + e.kick * 0.5).toFixed(3) + ')'; g.lineWidth = 1.5;
+    g.beginPath(); g.arc(cx, cy, R0 * 0.94, 0, tau); g.stroke();
+  },
+
+  /* ================= scene 17: digital rain ================= */
+  rainChar() {
+    return Math.random() < 0.25 ? String(Math.floor(Math.random() * 10)) : String.fromCharCode(0xff71 + Math.floor(Math.random() * 45));
+  },
+  rainDrop(rows, init, c, v) {
+    return { y: init ? Math.random() * rows * 1.3 - rows * 0.1 : c ? 0 : -Math.random() * rows * 0.5, v: 9 + Math.random() * 12 + (v || 0) * 10, len: 8 + Math.floor(Math.random() * 14) + (c ? 6 : 0), c: c || null, ch: Array.from({ length: rows }, () => this.rainChar()) };
+  },
+  drawRain(g, W, H, dt) {
+    const e = this.env, cs = Math.max(16, Math.round(Math.min(W, H) / 34)), cols = Math.ceil(W / cs), rows = Math.ceil(H / cs) + 1;
+    if (!this.rain || this.rain.cols !== cols || this.rain.rows !== rows) this.rain = { cols, rows, d: Array.from({ length: cols }, () => this.rainDrop(rows, true)) };
+    const D = this.rain.d;
+    g.globalAlpha = 1; g.fillStyle = '#010a06'; g.fillRect(0, 0, W, H);
+    const bg = g.createLinearGradient(0, H, 0, H * 0.35);
+    bg.addColorStop(0, 'rgba(30,255,140,' + (0.05 + e.bass * 0.22).toFixed(3) + ')'); bg.addColorStop(1, 'rgba(30,255,140,0)');
+    g.fillStyle = bg; g.fillRect(0, 0, W, H);
+    for (const x of this.fresh.slice(0, 4)) D[clamp(Math.floor(((x.n - 30) / 70) * cols), 0, cols - 1)] = this.rainDrop(rows, false, x.c || '#7cf7d4', x.v);
+    if (this.freshDrums.some((x) => x.n === 0)) for (let k = 0; k < 5; k++) D[Math.floor(Math.random() * cols)] = this.rainDrop(rows, false, '#c8ffe0', 0.8);
+    g.font = cs + 'px ' + (cssVar('--font-lcd') || 'monospace'); g.textBaseline = 'top';
+    const spd = (this.reduce ? 0.35 : 1) * (0.6 + e.level * 1.4);
+    for (let i = 0; i < cols; i++) {
+      const d = D[i];
+      d.y += d.v * dt * spd;
+      const head = Math.floor(d.y);
+      if (head - d.len > rows) { D[i] = this.rainDrop(rows, false); continue; }
+      if (!this.reduce) d.ch[Math.floor(Math.random() * rows)] = this.rainChar();
+      for (let k = 0; k < d.len; k++) {
+        const row = head - k;
+        if (row < 0 || row >= rows) continue;
+        g.globalAlpha = k === 0 ? 1 : Math.pow(1 - k / d.len, 1.6) * 0.85;
+        g.fillStyle = k === 0 ? '#eafff1' : d.c || '#27ff7e';
+        g.fillText(d.ch[row], i * cs, row * cs);
+      }
+    }
+    g.globalAlpha = 1;
+  },
+
+  /* ================= scene 18: lava lamp ================= */
+  drawLava(g, W, H, dt) {
+    const e = this.env, ph = 72, pw = clamp(Math.round(ph * W / H), 40, 200);
+    if (!this.lava || this.lava.w !== pw) {
+      const c = document.createElement('canvas');
+      c.width = pw; c.height = ph;
+      const lut = new Uint8ClampedArray(256 * 3), mix = (a, b, t) => a + (b - a) * t, sm = (t) => { t = clamp(t, 0, 1); return t * t * (3 - 2 * t); };
+      for (let i = 0; i < 256; i++) {
+        const f = (i / 255) * 4, k = clamp((f - 0.95) / 2.2, 0, 1), t = sm((f - 0.88) / 0.14), q = Math.min(1, f / 0.95);
+        const hr = 8 + 40 * q * q, hg = 3 + 6 * q, hb = 18 + 60 * q * q;
+        let r = 255, gg, b;
+        if (k < 0.5) { gg = mix(61, 140, k / 0.5); b = mix(154, 50, k / 0.5); } else { gg = mix(140, 230, (k - 0.5) / 0.5); b = mix(50, 120, (k - 0.5) / 0.5); }
+        lut[i * 3] = mix(hr, r, t); lut[i * 3 + 1] = mix(hg, gg, t); lut[i * 3 + 2] = mix(hb, b, t);
+      }
+      const rand = this.seeded(77);
+      this.lava = { w: pw, c, g: c.getContext('2d'), img: c.getContext('2d').createImageData(pw, ph), lut, ph: 0,
+        blobs: Array.from({ length: 9 }, (_, i) => ({ sx: 0.25 + rand() * 0.5, sy: 0.2 + rand() * 0.45, px: rand() * 6.28, py: rand() * 6.28, r: 0.05 + 0.04 * rand() + (i % 3) * 0.008, e: 0, pulse: 0 })) };
+    }
+    const L = this.lava, B = this.bands.length, per = Math.floor(B / L.blobs.length);
+    L.ph += dt * (this.reduce ? 0.12 : 0.3 + e.level * 0.8);
+    for (const x of this.fresh.slice(0, 4)) { const b = L.blobs[Math.floor(Math.random() * L.blobs.length)]; b.pulse = Math.min(1, b.pulse + clamp(x.v, 0, 1) * 0.7); }
+    const pos = L.blobs.map((b, i) => {
+      let a = 0;
+      for (let k = 0; k < per; k++) a += this.bands[i * per + k] || 0;
+      b.e += (a / per - b.e) * Math.min(1, dt * 8); b.pulse *= Math.exp(-dt * 3);
+      const r = ph * b.r * (0.7 + b.e * 0.5 + b.pulse * 0.4 + (i < 3 ? e.kick * 0.25 : 0));
+      return [pw / 2 + Math.sin(L.ph * b.sx + b.px) * pw * 0.36, ph / 2 + Math.sin(L.ph * b.sy + b.py) * ph * 0.4, r * r];
+    });
+    const d = L.img.data, lut = L.lut;
+    for (let y = 0; y < ph; y++) for (let x = 0; x < pw; x++) {
+      let f = 0;
+      for (let k = 0; k < pos.length; k++) { const p = pos[k], dx = x - p[0], dy = y - p[1]; f += p[2] / (dx * dx + dy * dy + 1); }
+      const li = Math.min(255, Math.floor((f / 4) * 255)) * 3, o = (y * pw + x) * 4;
+      d[o] = lut[li]; d[o + 1] = lut[li + 1]; d[o + 2] = lut[li + 2]; d[o + 3] = 255;
+    }
+    L.g.putImageData(L.img, 0, 0);
+    g.imageSmoothingEnabled = true;
+    g.drawImage(L.c, 0, 0, W, H);
   },
 });
 
@@ -13337,7 +13792,7 @@ const Themes = (ND.Themes = {
     if (typeof readScopePalette === 'function') readScopePalette();
     if (Viz) {
       Viz._pal = null;
-      if (t.viz && !o.keepScene) { const i = Viz.SCENES.findIndex((s) => s.key === t.viz.scene); if (i >= 0) { if (Viz.el) Viz.setScene(i); else Viz.scene = i; } }
+      if (t.viz && !o.keepScene && !Viz.sceneOff(t.viz.scene)) { const i = Viz.SCENES.findIndex((s) => s.key === t.viz.scene); if (i >= 0) { if (Viz.el) Viz.setScene(i); else Viz.scene = i; } }
     }
     if (!o.quiet && typeof App !== 'undefined' && App.song && App.render) App.render('arr rack editor transport keys');
     if (Themes.view === 'gallery' && Themes.modal && Themes.modal.box.isConnected && !o.preview) Themes.renderGallery();
@@ -14946,7 +15401,7 @@ function openHelp() {
       h('div', null, h('b', null, 'Loop recorder. '), 'Under the keys: press Loop, play for 1, 2 or 4 bars and it repeats. Press again to add layers, and To pattern turns the loop into a pattern in the selected part.'),
       h('div', null, h('b', null, 'Share. '), 'Makes a link that opens this exact song for whoever you send it to. An edited song travels inside the link itself.'),
       h('div', null, h('b', null, 'Export. '), 'Render the song or the current part to a WAV file, or save the song file to open later or share.'),
-      h('div', null, h('b', null, 'Visualizer. '), 'Full-screen light show for an audience: a sunset highway, falling notes on a keyboard, a neon tunnel and a vector scope, all driven by the notes being played. ', k('←'), ' ', k('→'), ' change scene, ', k('F'), ' full screen, ', k('Esc'), ' close. Playlist plays one song after another.')));
+      h('div', null, h('b', null, 'Visualizer. '), 'Full-screen light show for an audience, with 18 scenes (a sunset highway, falling notes, a neon tunnel, fireworks, an aurora and more) all driven by the notes being played. ', k('←'), ' ', k('→'), ' change scene, ', k('S'), ' choose which scenes and effects are on, ', k('F'), ' full screen, ', k('Esc'), ' close. Playlist plays one song after another.')));
   openModal('How it works', body, { width: 780 });
 }
 
