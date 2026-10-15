@@ -5298,7 +5298,7 @@ function renderLibraryBody() {
       d.vocals ? h('span', { class: 'credit' }, '♪ Vocals: ' + d.vocals) : null),
     h('div', { class: 'acts' }, Favs.star(d.key, 'btn small fav'), h('button', { class: 'btn small', title: 'Add to your playlist (play it from the Visualizer’s SONGS panel)', onclick: (ev) => { const n = Viz.enqueue([d.key]); ev.currentTarget.textContent = '✓ Playlist'; toast(n ? 'Added “' + d.name + '” to your playlist (' + Viz.queue.length + ' songs). Open the Visualizer and press SONGS to play it.' : '“' + d.name + '” is already in your playlist.'); } }, '+ Playlist'), h('button', { class: 'btn' + (App.lib.demoKey === d.key ? ' on' : ''), onclick: () => guardUnsaved(() => { loadSong(d.build(), { demoKey: d.key }); closeModal(); setModeSong(); toast('Loaded “' + d.name + '”. Press Play.'); }) }, App.lib.demoKey === d.key ? 'Reload' : 'Load')));
   const group = (g) => h('div', { class: 'songlist' }, DEMOS.filter((d) => (d.group || 'original') === g).map(demoItem));
-  const originals = group('original'), tributes = group('tribute'), opus = group('opus'), classics = group('classic'), halloween = group('halloween'), anime = group('anime'), claudeOriginals = group('claude');
+  const originals = group('original'), tributes = group('tribute'), opus = group('opus'), classics = group('classic'), halloween = group('halloween'), anime = group('anime'), claudeOriginals = group('claude'), boozerang = group('boozerang');
   const mine = h('div', { class: 'songlist' }, h('p', null, 'Loading your songs…'));
   LibStore.list().then((list) => {
     mine.textContent = '';
@@ -5356,6 +5356,9 @@ function renderLibraryBody() {
     h('h3', null, 'ANIME NIGHT \u00b7 PIXEL SCENES'),
     h('p', null, 'Original songs in the style of anime music, each with its own pixel-art scene in the Visualizer: a rooftop at sunset, a rainy bus stop, a giant-robot hangar and more.'),
     anime,
+    h('h3', null, 'BOOZERANG \u00b7 GAME SOUNDTRACK'),
+    h('p', null, 'Instrumental music for Boozerang, the couch party brawler: menus, four arenas, Alcoholic Mode and the victory toast. Every track loops cleanly.'),
+    boozerang,
     h('h3', null, 'YOUR SONGS'),
     h('p', null, LibStore.where()),
     mine);
@@ -7256,7 +7259,7 @@ const Viz = (ND.Viz = {
 
 const VIZ_GROUPS = [
   ['original', 'Originals'], ['tribute', 'Inspired by the classics'], ['opus', 'New originals · Opus 5.5 High'], ['claude', 'Claude originals · Sonnet 5.5 Extra'],
-  ['classic', 'Synth classics'], ['halloween', 'Halloween night'], ['anime', 'Anime night \u00b7 pixel scenes'],
+  ['classic', 'Synth classics'], ['halloween', 'Halloween night'], ['anime', 'Anime night \u00b7 pixel scenes'], ['boozerang', 'Boozerang \u00b7 game soundtrack'],
 ];
 
 Object.assign(Viz, {
@@ -13023,6 +13026,1268 @@ DSL.register({
 
 /* ---- js/30-songs-studio.js ---- */
 /* Built-in songs, studio: songs added through the Clawd Rdio MCP server (tools/mcp/server.mjs). */
+
+/* ============ BOOZERANG ANTHEM ============ */
+DSL.register({
+  key: 'boozerang-anthem', name: 'Boozerang Anthem', style: 'Bar-anthem synthpop', bpm: 126, keyName: 'F major', group: 'boozerang', by: 'Sonnet 5.5',
+  desc: 'Boozerang main menu: a stomp-and-clap bar anthem with a rising "Booz-e-rang" shout, bouncing octave bass, off-beat stabs, brass, a gang-vocal synth choir and a bar-room piano break. It loops back into the intro.',
+}, () => {
+  const { mel, drums, times, rep, arp, transpose } = DSL;
+  const bars = (list, f) => list.map(f).join(' | ');
+
+  const P_IN = ['F', 'C', 'Dm', 'Bb'];
+  const P_CH = ['F', 'C', 'Dm', 'Bb', 'F', 'C', 'Bb', 'C'];
+  const P_V = ['Dm', 'Bb', 'F', 'C', 'Dm', 'Bb', 'C', 'C'];
+  const P_PRE = ['Bb', 'Bb', 'C', 'C'];
+  const P_BRK = ['Gm', 'C', 'F', 'F', 'Gm', 'C', 'Dm', 'C'];
+  const P_OUT = ['Bb', 'Gm', 'C', 'C'];
+
+  const ROOT = { F: 'F2', C: 'C2', Dm: 'D2', Bb: 'Bb1', Gm: 'G1' };
+  const STAB = { F: 'A4+C5+F5', C: 'G4+C5+E5', Dm: 'A4+D5+F5', Bb: 'Bb4+D5+F5', Gm: 'Bb4+D5+G5' };
+  const KEY = { F: 'A3+C4+F4', C: 'G3+C4+E4', Dm: 'A3+D4+F4', Bb: 'Bb3+D4+F4', Gm: 'Bb3+D4+G4' };
+  const CHO = { F: 'A4+C5+F5', C: 'G4+C5+E5', Dm: 'A4+D5+F5', Bb: 'Bb4+D5+F5', Gm: 'Bb4+D5+G5' };
+  const PADV = { F: 'C4+F4+A4', C: 'C4+E4+G4', Dm: 'D4+F4+A4', Bb: 'D4+F4+Bb4', Gm: 'D4+G4+Bb4' };
+
+  const bounce = (c) => { const r = ROOT[c], R = up8(r); return `${r}:2 ${R}:2 ${r}:2 ${R}:2 ${r}:2 ${R}:2 ${r}:2 ${R}:2`; };
+  const bounceV = (c) => { const r = ROOT[c], R = up8(r); return `${r}:3 .:1 ${r}:2 ${R}:2 ${r}:3 .:1 ${r}:2 ${R}:2`; };
+  const pedal = (c) => `${ROOT[c]}:4 ${ROOT[c]}:4 ${ROOT[c]}:4 ${ROOT[c]}:4`;
+  const stab = (c) => rep(`.:2 ${STAB[c]}:1 .:1`, 4);
+  const stabHold = (c) => `${STAB[c]}:3 .:1 ${STAB[c]}:2 .:2 ${STAB[c]}:3 .:1 ${STAB[c]}:2 .:2`;
+  const comp = (c) => `${KEY[c]}:3 ${KEY[c]}:3 ${KEY[c]}:2 .:2 ${KEY[c]}:3 ${KEY[c]}:3`;
+
+  /* ---- melodies ---- */
+  const HOOK = 'C5:2 C5:2 F5:4 E5:2 F5:2 A5:4 | G5:4 E5:2 C5:2 D5:4 E5:4 | D5:2 D5:2 F5:4 E5:2 D5:2 C5:4 | D5:4 C5:2 Bb4:2 C5:8 | ' +
+    'C5:2 C5:2 F5:4 E5:2 F5:2 A5:4 | G5:4 E5:2 C5:2 E5:4 G5:4 | F5:2 F5:2 D5:4 F5:2 G5:2 Bb5:4 | A5:4 G5:4 E5:4 C5:4';
+  const HOOK_END = HOOK.replace('A5:4 G5:4 E5:4 C5:4', 'A5:4 G5:4 G5:4 E5:4');
+  const VERSE = '.:2 F5:2 A5:2 F5:2 D5:2 F5:2 A4:2 D5:2 | .:2 D5:2 F5:2 D5:2 Bb4:2 D5:2 F5:4 | .:2 C5:2 F5:2 A5:2 G5:2 F5:2 C5:2 A4:2 | G4:2 C5:2 E5:2 G5:4 E5:2 C5:4 | ' +
+    '.:2 F5:2 A5:2 F5:2 D5:2 F5:2 A4:2 D5:2 | F5:2 D5:2 Bb4:2 D5:2 F5:4 D5:4 | E5:2 G5:2 E5:2 C5:2 G4:2 C5:2 E5:4 | G5:4 E5:2 D5:2 C5:8';
+  const VERSE2 = '.:2 F5:2 A5:2 F5:2 D5:2 F5:2 A5:2 D6:2 | .:2 D5:2 F5:2 D5:2 Bb4:2 D5:2 F5:4 | .:2 C5:2 F5:2 A5:2 G5:2 F5:2 C6:2 A5:2 | G5:2 C5:2 E5:2 G5:4 E5:2 G5:4 | ' +
+    '.:2 F5:2 A5:2 F5:2 D5:2 F5:2 A5:2 D6:2 | F5:2 D5:2 Bb4:2 D5:2 F5:4 Bb5:4 | E5:2 G5:2 E5:2 C5:2 G5:2 C6:2 E6:4 | G5:4 E5:2 D5:2 C5:8';
+  const PRE_L = 'D5:2 F5:2 D5:2 F5:2 Bb5:4 .:4 | D5:2 F5:2 D5:2 F5:2 A5:4 Bb5:4 | E5:2 G5:2 E5:2 G5:2 C6:4 .:4 | G5:2 G5:2 G5:2 G5:2 G5:2 G5:2 G5:2 G5:2';
+  const BRK_L = 'D5:6 D5:2 D5:4 Bb4:4 | E5:6 E5:2 E5:4 C5:4 | F5:6 F5:2 A5:4 F5:4 | A5:8 C6:4 .:4 | D5:6 D5:2 D5:4 G5:4 | E5:6 E5:2 G5:4 E5:4 | D5:4 F5:4 A5:4 D6:4 | C6:8 G5:8';
+  const OUT_L = 'D5:4 F5:4 Bb5:8 | D5:4 G5:4 Bb5:8 | E5:4 G5:4 C6:4 E6:4 | G5:2 G5:2 G5:4 .:2 G5:2 G5:2 G5:2';
+  const SHOUT = '.:48 C5:1 C5:1 F5:6 .:8';
+
+  /* ---- drums ---- */
+  const k4 = 'x...x...x...x...';
+  const stomp = { BD: 'x.......x.......', CP: '....x.......x...' };
+  const groove = { BD: k4, CP: '....x.......x...', CH: '..x...x...x...x.' };
+  const fillIn = { BD: k4, SD: 'o.o.o.o.xxxxXXXX', CH: '..x...x.........' };
+  const chorus = { BD: k4, SD: '....x.......x...', CP: '....x.......x...', CH: 'x.x.x.x.x.x.x.x.', OH: '..............x.' };
+  const chorusIn = Object.assign({}, chorus, { CY: 'X...............' });
+  const chorusFill = { BD: 'x...x...x...x...', SD: '....x...x.x.xxXX', CP: '....x...........', CH: 'x.x.x.x.........', HT: '..........x.....', MT: '............x...', LT: '..............X.' };
+  const verse = { BD: 'x.....x.x.x.....', SD: '....x.......x...', CH: 'x.x.x.x.x.x.x.x.', RS: '..............o.' };
+  const verseFill = { BD: 'x.....x.x.......', SD: '....x.....x.xxXX', CH: 'x.x.x.x.x.......' };
+  const pre = [{ BD: k4, SD: '....x...x...x...' }, { BD: k4, SD: '....x...x.x.x.x.' }, { BD: k4, SD: 'x.x.x.x.xxxxxxxx' }, { BD: k4, SD: 'xxxxxxxxxxxxXXXX', CY: '................' }];
+  const brk = { BD: 'x.......x.......', CP: '....x...x.x.x...', CH: 'o.o.o.o.o.o.o.o.' };
+  const brkFill = { BD: 'x.......x.......', CP: 'x.x.x.x.x.x.x.x.', SD: '..............XX' };
+  const outro = [{ BD: k4, SD: '....x.......x...', CP: '....x.......x...', CH: 'x.x.x.x.x.x.x.x.' }, { BD: k4, SD: '....x.......x...', CP: '....x.......x...', CH: 'x.x.x.x.x.x.x.x.' },
+    { BD: k4, SD: '....x.......x...', CP: '....x.......x...', CH: 'x.x.x.x.x.x.x.x.' }, { BD: k4, SD: 'x.x.x.x.xxxxxxXX', CY: '................' }];
+
+  return {
+    name: 'Boozerang Anthem', bpm: 126, key: { root: 5, scale: 'major' },
+    fx: { revSize: 0.5, revLvl: 0.4, dlyDiv: '1/8d', dlyFb: 0.28, dlyTone: 0.5, dlyLvl: 0.32, gateLvl: 0.72, comp: 0.45, vol: 0.72 },
+    tracks: [
+      { name: 'DRUMS', type: 'drum', kit: 'studio', color: '#ff5a36', vol: 0.78, rev: 0.05,
+        voices: { SD: { gate: 0.72 }, CP: { lvl: 0.62, gate: 0.35 }, CH: { lvl: 0.4 }, OH: { lvl: 0.34 }, CY: { lvl: 0.4 }, RS: { lvl: 0.5 } },
+        pats: {
+          A: drums([{ BD: k4 }, Object.assign({}, stomp, { BD: k4 }), groove, fillIn]),
+          B: drums([chorusIn].concat(times(chorus, 6), [chorusFill])),
+          C: drums(times(verse, 7).concat([verseFill])),
+          D: drums(pre),
+          E: drums([Object.assign({}, brk, { CY: 'X...............' })].concat(times(brk, 6), [brkFill])),
+          F: drums(outro),
+        } },
+      { name: 'BASS', preset: 'pulsebass', color: '#3ce6ff', vol: 0.72, rev: 0.02,
+        pats: {
+          A: mel(bars(P_IN, bounce), { expect: 64 }),
+          B: mel(bars(P_CH, bounce), { expect: 128 }),
+          C: mel(bars(P_V, bounceV), { expect: 128 }),
+          D: mel(bars(P_PRE, pedal), { expect: 64 }),
+          E: mel(bars(P_BRK, pedal), { expect: 128 }),
+          F: mel(bars(P_OUT, bounce), { expect: 64 }),
+        } },
+      { name: 'STAB', preset: 'brightpoly', color: '#ffd23a', vol: 0.4, rev: 0.2, pan: -0.15,
+        pats: {
+          A: mel(bars(P_IN, stab), { expect: 64 }),
+          B: mel(bars(P_CH, stab), { expect: 128 }),
+          C: mel(bars(P_V, stabHold), { expect: 128 }),
+          D: mel(bars(P_PRE, stab), { expect: 64 }),
+          F: mel(bars(P_OUT, stab), { expect: 64 }),
+        } },
+      { name: 'LEAD', preset: 'staccato', color: '#ff3d9a', vol: 0.58, rev: 0.22, dly: 0.26, synth: { vib: 10 },
+        pats: {
+          A: mel(HOOK, { expect: 128 }),
+          B: mel(HOOK_END, { expect: 128 }),
+          C: mel(VERSE, { expect: 128 }),
+          D: mel(VERSE2, { expect: 128 }),
+          E: mel(PRE_L, { expect: 64 }),
+          F: mel(BRK_L, { expect: 128 }),
+          G: mel(OUT_L, { expect: 64 }),
+          H: mel(SHOUT, { expect: 64 }),
+        } },
+      { name: 'HORNS', preset: 'brass', color: '#ff9a3c', vol: 0.44, rev: 0.22, pan: 0.15,
+        pats: {
+          A: transpose(mel(HOOK, { expect: 128 }), -12, 0.9),
+          B: transpose(mel(HOOK_END, { expect: 128 }), -12, 1),
+          C: mel(bars(P_OUT, stabHold), { expect: 64 }),
+        } },
+      { name: 'CHOIR', preset: 'choir', color: '#b58cff', vol: 0.34, rev: 0.4, pan: -0.1,
+        pats: {
+          A: mel(bars(P_CH, (c) => `${CHO[c]}:8 ${CHO[c]}:8?`), { expect: 128 }),
+          B: mel(bars(P_BRK, (c) => `${CHO[c]}:16`), { expect: 128 }),
+        } },
+      { name: 'MARIMBA', preset: 'marimba', color: '#5dffb4', vol: 0.4, rev: 0.22, dly: 0.2, pan: -0.25,
+        pats: {
+          A: arp(P_IN.map((c) => [c, 16]), { low: 'F4', rate: 2, len: 2, order: [0, 1, 2, 1, 2, 3, 2, 1], vel: 0.55, acc: 0.72, accEvery: 4 }),
+          B: arp(P_V.map((c) => [c, 16]), { low: 'A4', rate: 2, len: 1, order: [0, 2, 1, 2, 0, 2, 3, 2], vel: 0.5, acc: 0.68, accEvery: 4 }),
+          C: arp(P_CH.map((c) => [c, 16]), { low: 'F5', rate: 1, len: 1, order: [0, 1, 2, 1], vel: 0.42, acc: 0.6, accEvery: 4 }),
+        } },
+      { name: 'KEYS', preset: 'epiano', color: '#6fa8ff', vol: 0.5, rev: 0.28, pan: 0.2,
+        pats: {
+          A: mel(bars(P_V, comp), { expect: 128 }),
+          B: mel(bars(P_BRK, (c) => `${KEY[c]}:2 ${KEY[c]}:2 .:2 ${KEY[c]}:2 .:2 ${KEY[c]}:2 ${KEY[c]}:2 .:2`), { expect: 128 }),
+        } },
+      { name: 'STRINGS', preset: 'strings', color: '#6fa8ff', vol: 0.34, rev: 0.4,
+        pats: {
+          A: mel(bars(P_CH, (c) => `${PADV[c]}:16`), { expect: 128 }),
+          B: mel(bars(P_PRE, (c) => `${PADV[c]}:16`), { expect: 64 }),
+        } },
+      { name: 'RISER', preset: 'windsweep', color: '#c8f0ff', vol: 0.3, rev: 0.4,
+        pats: { A: mel('C4:64', { expect: 64 }) } },
+      { name: 'PERC', type: 'drum', kit: 'studio', color: '#ffb0e0', vol: 0.5, rev: 0.05,
+        voices: { SH: { lvl: 0.5 }, CB: { lvl: 0.5 }, CP: { lvl: 0.5, gate: 0 } },
+        pats: {
+          A: drums(times({ SH: 'xoxoxoxoxoxoxoxo', CB: '......x.......x.' }, 8)),
+          B: drums(times({ SH: 'xoxoxoxoxoxoxoxo', CB: '' }, 8).map((b) => ({ SH: b.SH }))),
+        } },
+    ],
+    sections: [
+      ['Intro', 4, { DRUMS: 'A', BASS: 'A', STAB: 'A', LEAD: 'H', MARIMBA: 'A' }],
+      ['Hook', 8, { DRUMS: 'B', BASS: 'B', STAB: 'B', LEAD: 'A', HORNS: 'A', MARIMBA: 'C', STRINGS: 'A' }],
+      ['Verse 1', 8, { DRUMS: 'C', BASS: 'C', STAB: 'C', LEAD: 'C', KEYS: 'A', MARIMBA: 'B' }],
+      ['Pre-chorus', 4, { DRUMS: 'D', BASS: 'D', STAB: 'D', LEAD: 'E', STRINGS: 'B', RISER: 'A' }],
+      ['Chorus', 8, { DRUMS: 'B', BASS: 'B', STAB: 'B', LEAD: 'A', HORNS: 'A', CHOIR: 'A', MARIMBA: 'C', STRINGS: 'A', PERC: 'A' }],
+      ['Verse 2', 8, { DRUMS: 'C', BASS: 'C', STAB: 'C', LEAD: 'D', KEYS: 'A', MARIMBA: 'B', PERC: 'B' }],
+      ['Pre-chorus 2', 4, { DRUMS: 'D', BASS: 'D', STAB: 'D', LEAD: 'E', STRINGS: 'B', RISER: 'A' }],
+      ['Bar-room break', 8, { DRUMS: 'E', BASS: 'E', LEAD: 'F', KEYS: 'B', CHOIR: 'B' }],
+      ['Last round', 8, { DRUMS: 'B', BASS: 'B', STAB: 'B', LEAD: 'B', HORNS: 'B', CHOIR: 'A', MARIMBA: 'C', STRINGS: 'A', PERC: 'A' }],
+      ['Turnaround', 4, { DRUMS: 'F', BASS: 'F', STAB: 'F', LEAD: 'G', HORNS: 'C', PERC: 'B' }],
+    ],
+  };
+});
+
+/* ============ PRE-GAME LOUNGE ============ */
+DSL.register({
+  key: 'pregame-lounge', name: 'Pre-Game Lounge', style: 'Bossa-funk lounge', bpm: 100, swing: 0.3, keyName: 'Eb major', group: 'boozerang', by: 'Sonnet 5.5',
+  desc: 'Boozerang lobby and character select: a relaxed but upbeat cocktail-bar groove. Cross-stick bossa drums, a fretless bass, tine e-piano 9ths, vibes and a breathy lyricon sax that never repeats a phrase the same way twice, so it can loop for a long time.',
+}, () => {
+  const { mel, drums, times, rep, arp, tr } = DSL;
+  const bars = (list, f) => list.map(f).join(' | ');
+
+  const ROOT = { EbM: 'Eb2', Cm: 'C2', Fm: 'F2', Bb7: 'Bb1', Gm: 'G2', C7: 'C2', AbM: 'Ab1', Dø: 'D2', G7: 'G1' };
+  const VOI = {
+    EbM: 'G3+Bb3+D4+F4', Cm: 'Eb3+G3+Bb3+D4', Fm: 'Ab3+C4+Eb4+G4', Bb7: 'D4+F4+Ab4+C5', Gm: 'Bb3+D4+F4+G4', C7: 'E3+G3+Bb3+D4',
+    AbM: 'C4+Eb4+G4+Bb4', Dø: 'F3+Ab3+C4+Eb4', G7: 'F3+B3+D4+G4',
+  };
+  const PAD = { EbM: 'Bb3+D4+G4', Cm: 'Bb3+Eb4+G4', Fm: 'C4+Eb4+Ab4', Bb7: 'D4+F4+Ab4', Gm: 'D4+F4+Bb4', C7: 'Bb3+E4+G4', AbM: 'Eb4+G4+C5', Dø: 'Ab3+C4+F4', G7: 'B3+D4+F4' };
+
+  const A = [['EbM'], ['Cm'], ['Fm'], ['Bb7'], ['EbM'], ['Gm', 'C7'], ['Fm'], ['Bb7']];
+  const B = [['AbM'], ['Gm'], ['Cm'], ['Fm'], ['AbM'], ['Bb7'], ['Gm', 'Cm'], ['Fm', 'Bb7']];
+  const BR = [['Cm'], ['Cm'], ['AbM'], ['AbM'], ['Dø'], ['G7'], ['Fm'], ['Bb7']];
+  const IN = [['EbM'], ['Cm'], ['Fm'], ['Bb7']];
+  const OUT = [['Fm'], ['Bb7'], ['Gm', 'C7'], ['Fm', 'Bb7']];
+
+  const bass = (cs) => {
+    if (cs.length === 2) return cs.map((c) => { const r = ROOT[c]; return `${r}:5 .:1 ${tr(r, 7)}:2`; }).join(' ');
+    const r = ROOT[cs[0]];
+    return `${r}:6 .:2 ${up8(r)}:2 .:2 ${tr(r, 7)}:4`;
+  };
+  const bassB = (cs) => {
+    if (cs.length === 2) return cs.map((c) => { const r = ROOT[c]; return `${r}:3 ${tr(r, 7)}:2 ${up8(r)}:3`; }).join(' ');
+    const r = ROOT[cs[0]];
+    return `${r}:3 .:1 ${r}:2 ${tr(r, 7)}:2 .:2 ${up8(r)}:3 ${tr(r, 7)}:3`;
+  };
+  const compA = (cs) => cs.length === 2 ? cs.map((c) => `${VOI[c]}:4 .:1 ${VOI[c]}:3`).join(' ') : `${VOI[cs[0]]}:6 .:2 ${VOI[cs[0]]}:3 .:1 ${VOI[cs[0]]}:4`;
+  const compB = (cs) => cs.length === 2 ? cs.map((c) => `.:1 ${VOI[c]}:3 ${VOI[c]}:4`).join(' ') : `.:2 ${VOI[cs[0]]}:4 .:2 ${VOI[cs[0]]}:2 .:2 ${VOI[cs[0]]}:4`;
+  const pad = (cs) => cs.map((c) => `${PAD[c]}:${16 / cs.length}`).join(' ');
+  const SYM = { EbM: 'Ebmaj7', Cm: 'Cm7', Fm: 'Fm7', Bb7: 'Bb7', Gm: 'Gm7', C7: 'C7', AbM: 'Abmaj7', Dø: 'Ddim', G7: 'G7' };
+  const flat = (p) => p.flatMap((cs) => cs.map((c) => [SYM[c], 16 / cs.length]));
+
+  /* ---- sax melodies ---- */
+  const SAXA = '.:4 G4:4 Bb4:2 D5:2 C5:4 | Bb4:6 G4:2 F4:4 .:4 | .:2 Ab4:2 C5:4 Eb5:4 C5:4 | D5:6 C5:2 Ab4:4 F4:4 | ' +
+    '.:4 G4:4 Bb4:2 D5:2 F5:4 | F5:4 D5:2 Bb4:2 E5:4 G4:2 Bb4:2 | C5:4 Eb5:4 G4:4 C5:4 | D5:6 F5:2 D5:4 Bb4:4';
+  const SAXA2 = '.:2 G4:2 Bb4:4 D5:4 G5:4 | F5:4 D5:4 Bb4:4 .:4 | .:2 Ab4:2 C5:4 Eb5:2 F5:2 Eb5:4 | D5:4 F5:4 Ab5:2 F5:2 D5:4 | ' +
+    'G5:6 D5:2 Bb4:4 G4:4 | F5:4 D5:4 E5:4 G5:4 | Eb5:6 C5:2 G4:4 C5:4 | D5:8 .:8';
+  const SAXB = 'Eb5:6 C5:2 Eb5:4 G5:4 | F5:6 D5:2 Bb4:4 D5:4 | Eb5:4 G5:4 Bb5:4 G5:4 | Eb5:6 C5:2 G4:4 C5:4 | ' +
+    'Eb5:4 Eb5:2 G5:2 C6:8 | F5:6 Ab5:2 F5:4 D5:4 | Bb4:4 D5:4 Eb5:4 G5:4 | Ab5:4 F5:4 D5:4 Bb4:4';
+  const SAXB2 = 'G5:6 Eb5:2 C5:4 Eb5:4 | D5:4 F5:4 Bb5:8 | G5:4 F5:2 C5:2 Bb4:4 G4:4 | G4:4 C5:4 Eb5:8 | ' +
+    'C6:6 G5:2 Eb5:4 C5:4 | F5:8 D5:4 F5:4 | D5:4 Bb4:4 G5:4 Eb5:4 | F5:4 Ab5:4 F5:8';
+  const SAXBR = 'C5:8 G5:4 Bb5:4 | Bb5:6 G5:2 C5:8 | Eb5:4 G5:4 C6:8 | Bb5:6 G5:2 Eb5:8 | F5:6 Ab5:2 C6:4 Ab5:4 | G5:4 F5:4 D5:8 | C5:6 Eb5:2 F5:4 C6:4 | F5:4 D5:4 Bb4:8';
+  const SAXIN = '.:48 Bb4:2 D5:2 F5:4 D5:4 .:4';
+  const SAXOUT = 'C6:6 F5:2 C5:8 | D5:6 F5:2 Bb4:8 | G5:4 Bb4:4 E5:4 G4:4 | F5:4 Ab4:4 D5:4 Bb4:4';
+
+  /* ---- vibes ---- */
+  const VIBSOLO = 'Eb5:2 G5:2 Bb5:2 G5:2 D6:4 Bb5:4 | C6:2 Bb5:2 G5:2 Eb5:2 G5:4 Bb4:4 | Ab5:2 C6:2 Eb6:2 C6:2 Ab5:4 F5:4 | D6:2 C6:2 Ab5:2 F5:2 D5:8 | ' +
+    'Bb5:2 D6:2 Bb5:2 G5:2 Eb5:4 G5:4 | F5:2 D5:2 Bb4:2 D5:2 E5:4 G5:4 | C6:2 Eb6:2 C6:2 Ab5:2 F5:4 Ab5:4 | F5:2 Ab5:2 D6:2 F6:2 D6:4 Bb5:4';
+  const PING = (c) => ({ EbM: 'Bb6', Cm: 'G6', Fm: 'Ab6', Bb7: 'F6', Gm: 'D6', C7: 'E6', AbM: 'Eb6', Dø: 'C6', G7: 'D6' }[c]);
+
+  /* ---- drums ---- */
+  const bossa = { BD: 'x.....x.x.x.....', RS: 'x..x..x...x..x..', CH: 'o.x.o.x.o.x.o.x.', SH: 'g.g.g.g.g.g.g.g.' };
+  const bossaB = { BD: 'x.....x.x.......', RS: 'x..x..x...x..x..', CH: 'x.x.x.x.x.x.x.x.', SH: 'g.g.g.g.g.g.g.g.', CP: '............x...' };
+  const bossaFill = { BD: 'x.....x.x.......', RS: 'x..x..x...x.....', CH: 'o.x.o.x.o.x.....', LT: '..........g.x.x.', MT: '..............x.' };
+  const groove = { BD: 'x.....x.x.x.....', RS: '....x.......x...', CH: 'o.o.o.o.o.o.o.o.', SH: 'g.g.g.g.g.g.g.g.' };
+  const soft = { BD: 'x.......x.......', RS: 'x..x..x...x..x..', SH: 'g.g.g.g.g.g.g.g.' };
+
+  return {
+    name: 'Pre-Game Lounge', bpm: 100, swing: 0.3, key: { root: 3, scale: 'major' },
+    fx: { revSize: 0.6, revLvl: 0.42, dlyDiv: '1/8d', dlyFb: 0.3, dlyTone: 0.45, dlyLvl: 0.3, gateLvl: 0.3, comp: 0.42, vol: 0.78 },
+    tracks: [
+      { name: 'DRUMS', type: 'drum', kit: 'boombox', color: '#ff5a36', vol: 0.62, rev: 0.1,
+        voices: { BD: { lvl: 0.7, dec: 0.6 }, SD: { lvl: 0.5 }, CP: { lvl: 0.4 }, CH: { lvl: 0.3 }, RS: { lvl: 0.5 }, SH: { lvl: 0.34 }, LT: { lvl: 0.4 }, MT: { lvl: 0.4 } },
+        pats: {
+          A: drums(times(soft, 4)),
+          B: drums(times(bossa, 7).concat([bossaFill])),
+          C: drums(times(bossaB, 7).concat([bossaFill])),
+          D: drums(times(groove, 7).concat([bossaFill])),
+          E: drums(times(bossa, 3).concat([bossaFill])),
+        } },
+      { name: 'BASS', preset: 'fretless', color: '#3ce6ff', vol: 0.66, rev: 0.03,
+        pats: {
+          A: mel(bars(IN, bass), { expect: 64 }),
+          B: mel(bars(A, bass), { expect: 128 }),
+          C: mel(bars(B, bassB), { expect: 128 }),
+          D: mel(bars(BR, bass), { expect: 128 }),
+          E: mel(bars(OUT, bass), { expect: 64 }),
+          F: mel(bars(A, bassB), { expect: 128 }),
+          G: mel(bars(B, bass), { expect: 128 }),
+        } },
+      { name: 'KEYS', preset: 'epiano', color: '#b58cff', vol: 0.42, rev: 0.3, pan: -0.2,
+        pats: {
+          A: mel(bars(IN, compA), { expect: 64 }),
+          B: mel(bars(A, compA), { expect: 128 }),
+          C: mel(bars(B, compB), { expect: 128 }),
+          D: mel(bars(BR, compB), { expect: 128 }),
+          E: mel(bars(OUT, compA), { expect: 64 }),
+          F: mel(bars(A, compB), { expect: 128 }),
+          G: mel(bars(B, compA), { expect: 128 }),
+        } },
+      { name: 'SAX', preset: 'saxsynth', color: '#ff3d9a', vol: 0.46, rev: 0.32, dly: 0.28, pan: 0.1, synth: { vib: 18 },
+        pats: {
+          A: mel(SAXIN, { expect: 64 }),
+          B: mel(SAXA, { expect: 128 }),
+          C: mel(SAXB, { expect: 128 }),
+          D: mel(SAXA2, { expect: 128 }),
+          E: mel(SAXBR, { expect: 128 }),
+          F: mel(SAXB2, { expect: 128 }),
+          G: mel(SAXOUT, { expect: 64 }),
+        } },
+      { name: 'VIBES', preset: 'bells', color: '#5dffb4', vol: 0.34, rev: 0.4, dly: 0.3, pan: 0.3,
+        pats: {
+          A: arp(flat(A), { low: 'G4', rate: 4, len: 3, order: [0, 2, 1, 3], vel: 0.5, acc: 0.6, accEvery: 8 }),
+          B: arp(flat(B), { low: 'C5', rate: 2, len: 2, order: [0, 1, 2, 3, 2, 1, 0, 1], vel: 0.42, acc: 0.55, accEvery: 8 }),
+          C: mel(VIBSOLO, { expect: 128 }),
+          D: arp(flat(BR), { low: 'G4', rate: 4, len: 3, order: [0, 2, 1, 3], vel: 0.5, acc: 0.6, accEvery: 8 }),
+        } },
+      { name: 'MARIMBA', preset: 'marimba', color: '#ffd23a', vol: 0.34, rev: 0.25, dly: 0.2, pan: -0.3,
+        pats: {
+          A: arp(flat(A), { low: 'G3', rate: 2, len: 1, order: [0, 2, 1, 2, 3, 2, 1, 2], vel: 0.4, acc: 0.55, accEvery: 4 }),
+          B: arp(flat(B), { low: 'C4', rate: 2, len: 1, order: [0, 1, 2, 1, 3, 2, 1, 0], vel: 0.4, acc: 0.55, accEvery: 4 }),
+        } },
+      { name: 'PAD', preset: 'glasspad', color: '#6fa8ff', vol: 0.3, rev: 0.45,
+        pats: {
+          A: mel(bars(A, pad), { expect: 128 }),
+          B: mel(bars(B, pad), { expect: 128 }),
+          C: mel(bars(BR, pad), { expect: 128 }),
+          D: mel(bars(IN, pad), { expect: 64 }),
+          E: mel(bars(OUT, pad), { expect: 64 }),
+        } },
+      { name: 'CLINK', preset: 'bells', color: '#ffffff', vol: 0.26, rev: 0.5, dly: 0.4, pan: 0.45, synth: { oct: 1 },
+        pats: {
+          A: mel(A.map((cs) => `${PING(cs[0])}:2 .:14`).join(' | '), { expect: 128 }),
+          B: mel(B.map((cs, i) => (i % 2 ? `.:16` : `.:6 ${PING(cs[0])}:2 .:8`)).join(' | '), { expect: 128 }),
+        } },
+    ],
+    sections: [
+      ['Intro', 4, { DRUMS: 'A', BASS: 'A', KEYS: 'A', SAX: 'A', PAD: 'D' }],
+      ['Theme A', 8, { DRUMS: 'B', BASS: 'B', KEYS: 'B', SAX: 'B', VIBES: 'A', PAD: 'A', CLINK: 'A' }],
+      ['Theme B', 8, { DRUMS: 'C', BASS: 'C', KEYS: 'C', SAX: 'C', MARIMBA: 'B', PAD: 'B', CLINK: 'B' }],
+      ['Theme A, again', 8, { DRUMS: 'D', BASS: 'F', KEYS: 'F', SAX: 'D', VIBES: 'A', MARIMBA: 'A', PAD: 'A' }],
+      ['Bridge', 8, { DRUMS: 'E', BASS: 'D', KEYS: 'D', SAX: 'E', VIBES: 'D', PAD: 'C' }],
+      ['Vibes solo', 8, { DRUMS: 'B', BASS: 'F', KEYS: 'B', VIBES: 'C', MARIMBA: 'A', PAD: 'A' }],
+      ['Theme B, last', 8, { DRUMS: 'C', BASS: 'G', KEYS: 'G', SAX: 'F', VIBES: 'B', MARIMBA: 'B', PAD: 'B', CLINK: 'B' }],
+      ['Turnaround', 4, { DRUMS: 'A', BASS: 'E', KEYS: 'E', SAX: 'G', PAD: 'E', CLINK: 'A' }],
+    ],
+  };
+});
+
+/* ============ BIERGARTEN STOMP ============ */
+DSL.register({
+  key: 'biergarten-stomp', name: 'Biergarten Stomp', style: 'Oompah-polka synth stomp', bpm: 128, keyName: 'G major', group: 'boozerang', by: 'Sonnet 5.5',
+  desc: 'Boozerang beer garden battle: a tuba-bass oom-pah and musette accordion that turn into a gated-snare, four-on-the-floor synth stomp. Clarinet thirds, "hey!" brass stabs, a swaying trio and a stop-time Prost break.',
+}, () => {
+  const { mel, drums, times, rep, arp } = DSL;
+  const bars = (list, f) => list.map(f).join(' | ');
+
+  const SN = [];
+  for (let m = 36; m < 100; m++) if ([7, 9, 11, 0, 2, 4, 6].includes(m % 12)) SN.push(m);
+  const below = (src, k) => src.replace(/[A-G][#b]?\d/g, (nm) => { const i = SN.indexOf(parseNote(nm)); return i < 0 ? nm : noteName(SN[i + k]); });
+  const hi = (v) => v.split('+').map(up8).join('+');
+
+  const P_IN = ['G', 'C', 'D7', 'G'];
+  const P_A = ['G', 'C', 'G', 'D7', 'G', 'C', 'D7', 'G'];
+  const P_B = ['G', 'D', 'Em', 'C', 'G', 'D', 'C', 'D7'];
+  const P_T = ['C', 'D', 'G', 'Em', 'Am', 'D', 'G', 'D7'];
+  const P_K = ['G', 'G', 'C', 'D', 'G', 'Em', 'D7', 'D7'];
+  const P_U = ['C', 'C', 'D7', 'D7'];
+
+  const TU = { G: ['G1', 'D2'], C: ['C2', 'G1'], D: ['D2', 'A1'], D7: ['D2', 'A1'], Em: ['E2', 'B1'], Am: ['A1', 'E2'] };
+  const CHV = { G: 'B3+D4+G4', C: 'C4+E4+G4', D: 'A3+D4+F#4', D7: 'A3+C4+D4+F#4', Em: 'B3+E4+G4', Am: 'C4+E4+A4' };
+
+  const oom = (c) => `${TU[c][0]}:3 .:1 ${TU[c][1]}:3 .:1 ${TU[c][0]}:3 .:1 ${TU[c][1]}:3 .:1`;
+  const oomLong = (c) => `${TU[c][0]}:4 ${TU[c][1]}:4 ${TU[c][0]}:4 ${TU[c][1]}:4`;
+  const pump = (c) => rep(`${TU[c][0]}:2`, 8);
+  const pah = (c) => rep(`.:2 ${CHV[c]}:2`, 4);
+  const pahShort = (c) => rep(`.:2 ${CHV[c]}:1 .:1`, 4);
+  const sway = (c) => `${CHV[c]}:6 .:2 ${CHV[c]}:6 .:2`;
+  const hey = (c) => `${hi(CHV[c])}:2 .:6 ${hi(CHV[c])}:2 .:6`;
+
+  /* ---- melodies (accordion lead, clarinet a diatonic third below) ---- */
+  const A1 = 'D5:2 G5:2 B5:4 D6:4 B5:2 G5:2 | C6:2 B5:2 A5:2 G5:2 E5:4 G5:4 | D5:2 G5:2 B5:4 D6:4 G6:4 | F#5:2 A5:2 C6:4 B5:4 A5:4 | ' +
+    'G5:2 G5:2 B5:2 D6:2 G6:4 D6:4 | E6:4 D6:2 C6:2 B5:4 G5:4 | A5:2 B5:2 C6:2 A5:2 F#5:4 A5:4 | G5:6 G5:2 G5:4 .:4';
+  const A2 = 'B5:2 D6:2 G6:4 D6:2 B5:2 G5:4 | E6:2 D6:2 C6:2 B5:2 C6:4 E6:4 | D6:2 B5:2 G5:4 B5:2 D6:2 G6:4 | A5:2 C6:2 F#5:2 A5:2 D6:8 | ' +
+    'B5:2 B5:2 D6:4 G6:2 F#6:2 G6:4 | E6:4 G6:2 E6:2 C6:4 E6:4 | F#6:2 A5:2 C6:2 A5:2 D6:2 C6:2 A5:2 F#5:2 | G5:4 B5:4 D6:4 G6:4';
+  const B1 = 'D6:4 B5:2 G5:2 D6:4 B5:2 G5:2 | F#6:4 D6:2 A5:2 F#6:4 D6:2 A5:2 | E6:4 B5:2 G5:2 B5:4 E6:4 | E6:4 C6:2 G5:2 C6:4 E6:4 | ' +
+    'D6:2 D6:2 G6:4 D6:2 B5:2 G5:4 | A5:2 A5:2 D6:4 A5:2 F#5:2 D5:4 | E6:2 D6:2 C6:2 B5:2 C6:2 D6:2 E6:4 | F#6:4 D6:4 A5:4 F#5:4';
+  const B2 = 'G6:4 D6:2 B5:2 G6:4 D6:2 B5:2 | A6:4 F#6:2 D6:2 A6:4 F#6:2 D6:2 | G6:2 G6:2 E6:4 B5:2 E6:2 G6:4 | G6:4 E6:2 C6:2 E6:4 G6:4 | ' +
+    'D6:2 D6:2 G6:4 B6:4 G6:2 D6:2 | F#6:4 A6:4 F#6:2 D6:2 A5:2 F#5:2 | E6:2 G6:2 E6:2 C6:2 D6:2 B5:2 C6:4 | D6:2 F#6:2 A6:4 F#6:4 D6:4';
+  const TRIO = 'E6:6 D6:2 C6:4 G5:4 | A5:6 F#5:2 A5:4 D6:4 | B5:6 G5:2 B5:4 D6:4 | G5:6 B5:2 E6:8 | ' +
+    'E6:6 C6:2 A5:4 C6:4 | F#5:6 A5:2 D6:8 | B5:4 D6:4 G6:4 D6:4 | A5:2 C6:2 F#5:2 A5:2 D6:8';
+  const KB = 'G5:4 B5:4 D6:8 | .:8 D6:4 B5:4 | C6:4 E6:4 G6:8 | A5:4 C6:4 F#6:8 | ' +
+    'G5:4 B5:4 D6:4 G6:4 | E6:4 G6:4 B5:8 | A5:2 C6:2 A5:2 F#5:2 D5:8 | .:8 D6:2 D6:2 D6:2 D6:2';
+  const UT = 'E6:4 C6:4 G5:4 E5:4 | G5:4 E5:4 C5:8 | F#5:4 A5:4 C6:4 A5:4 | D6:2 D6:2 D6:2 D6:2 D6:2 D6:2 D6:2 D6:2';
+  const IN_L = '.:48 D5:2 G5:2 B5:4 D6:2 G6:2 .:4';
+
+  /* ---- drums ---- */
+  const polka = { BD: 'x...x...x...x...', SD: '..o...o...o...o.', CH: 'x.x.x.x.x.x.x.x.' };
+  const polkaFill = { BD: 'x...x...x...x...', SD: '..o...o...x.xxxx', CH: 'x.x.x.x.x.x.....', CB: '..............x.' };
+  const polkaIn = Object.assign({}, polka, { CY: 'X...............' });
+  const stomp = { BD: 'x...x...x...x...', CP: '....x.......x...', OH: '..x...x...x...x.' };
+  const stompIn = Object.assign({}, stomp, { CY: 'X...............' });
+  const stompFill = { BD: 'x...x...x...x...', SD: '....x...x.x.xxXX', CP: '....x...........', HT: '..........x.....', MT: '............x...', LT: '..............X.' };
+  const clap = { CP: '....x.......x...', RS: 'x.x.x.x.x.x.x.x.' };
+  const kick = (b) => ({ BD: b });
+  const roll = [{ BD: 'x...x...x...x...', SD: '....x...x...x...' }, { BD: 'x...x...x...x...', SD: '....x...x.x.x.x.' }, { BD: 'x...x...x...x...', SD: 'x.x.x.x.xxxxxxxx' }, { BD: 'x...x...x...x...', SD: 'xxxxxxxxxxxxXXXX', CY: '................' }];
+  const stopTime = [{ BD: 'X.......X.......', CP: '................' }, { BD: 'X...............' }, { BD: 'X.......X.......', CP: '....x.......x...' }, { BD: 'X...............', SD: '..............xx' }];
+
+  return {
+    name: 'Biergarten Stomp', bpm: 128, key: { root: 7, scale: 'major' },
+    fx: { revSize: 0.45, revLvl: 0.34, dlyDiv: '1/8', dlyFb: 0.22, dlyTone: 0.5, dlyLvl: 0.22, gateLvl: 0.7, comp: 0.45, vol: 0.72 },
+    tracks: [
+      { name: 'POLKA', type: 'drum', kit: 'boombox', color: '#ff5a36', vol: 0.7, rev: 0.06,
+        voices: { BD: { lvl: 0.8, dec: 0.5 }, SD: { lvl: 0.55 }, CH: { lvl: 0.3 }, CB: { lvl: 0.4 }, CY: { lvl: 0.4 } },
+        pats: {
+          A: drums([polkaIn, polka, polka, polkaFill]),
+          B: drums([polkaIn].concat(times(polka, 6), [polkaFill])),
+          C: drums(times(polka, 7).concat([polkaFill])),
+          D: drums([kick('x...x...x...x...'), kick('x...x...x...x...'), kick('x...x...x...x...'), { BD: 'x...x...x...x...', SD: 'o.o.o.o.xxxxXXXX' }]),
+        } },
+      { name: 'STOMP', type: 'drum', kit: 'club', color: '#ffd23a', vol: 0.76, rev: 0.05,
+        voices: { BD: { lvl: 0.9 }, CP: { lvl: 0.7, gate: 0.3 }, OH: { lvl: 0.34 }, SD: { lvl: 0.6, gate: 0.6 }, CY: { lvl: 0.42 }, HT: { lvl: 0.6 }, MT: { lvl: 0.6 }, LT: { lvl: 0.6 }, RS: { lvl: 0.4 } },
+        pats: {
+          A: drums([stompIn].concat(times(stomp, 6), [stompFill])),
+          B: drums(times(clap, 8)),
+          C: drums(roll),
+          D: drums(stopTime.concat(stopTime)),
+          E: drums(times(stomp, 3).concat([stompFill])),
+        } },
+      { name: 'TUBA', preset: 'pulsebass', color: '#3ce6ff', vol: 0.74, rev: 0.03, synth: { cut: 380 },
+        pats: {
+          A: mel(bars(P_IN, oom), { expect: 64 }),
+          B: mel(bars(P_A, oom), { expect: 128 }),
+          C: mel(bars(P_B, oom), { expect: 128 }),
+          D: mel(bars(P_T, oom), { expect: 128 }),
+          E: mel(bars(P_K, oomLong), { expect: 128 }),
+          F: mel(bars(P_U, oom), { expect: 64 }),
+        } },
+      { name: 'SYNBASS', preset: 'seqbass', color: '#00c8ff', vol: 0.5, rev: 0.02,
+        pats: {
+          A: mel(bars(P_B, pump), { expect: 128 }),
+          B: mel(bars(P_U, pump), { expect: 64 }),
+        } },
+      { name: 'ACCORD', preset: 'stab', color: '#ff9a3c', vol: 0.42, rev: 0.22, pan: -0.2, synth: { w1: 'saw', l1: 0.7, w2: 'saw', l2: 0.7, det2: 16, cut: 2200, fenv: 600, a: 0.012, d: 0.3, s: 0.6, r: 0.06, uni: 1 },
+        pats: {
+          A: mel(bars(P_IN, pah), { expect: 64 }),
+          B: mel(bars(P_A, pah), { expect: 128 }),
+          C: mel(bars(P_B, pahShort), { expect: 128 }),
+          D: mel(bars(P_T, sway), { expect: 128 }),
+          E: mel(bars(P_K, sway), { expect: 128 }),
+          F: mel(bars(P_U, pahShort), { expect: 64 }),
+        } },
+      { name: 'LEAD', preset: 'outrun', color: '#ff3d9a', vol: 0.5, rev: 0.22, dly: 0.2, pan: 0.05,
+        synth: { oct: -1, uni: 1, w2: 'saw', semi2: 0, det2: 18, l2: 0.8, vib: 8, cut: 3000, fenv: 500, mono: true, glide: 0.015 },
+        pats: {
+          A: mel(A1, { expect: 128 }),
+          B: mel(A2, { expect: 128 }),
+          C: mel(B1, { expect: 128 }),
+          D: mel(B2, { expect: 128 }),
+          E: mel(TRIO, { expect: 128 }),
+          F: mel(KB, { expect: 128 }),
+          G: mel(UT, { expect: 64 }),
+          H: mel(IN_L, { expect: 64 }),
+        } },
+      { name: 'CLARINET', preset: 'saxsynth', color: '#5dffb4', vol: 0.34, rev: 0.28, pan: 0.25, synth: { oct: -1, vib: 12, noise: 0.03, cut: 1500 },
+        pats: {
+          A: mel(below(A1, -2), { expect: 128 }),
+          B: mel(below(A2, -2), { expect: 128 }),
+          C: mel(below(TRIO, -2), { expect: 128 }),
+        } },
+      { name: 'POWER', preset: 'powerlead', color: '#ff7a3d', vol: 0.4, rev: 0.2, dly: 0.2, pan: 0.15,
+        pats: {
+          A: mel(B1, { expect: 128 }),
+          B: mel(B2, { expect: 128 }),
+          C: mel(A2, { expect: 128 }),
+        } },
+      { name: 'BRASS', preset: 'brass', color: '#ffd23a', vol: 0.4, rev: 0.2, pan: -0.15,
+        pats: {
+          A: mel(bars(P_B, hey), { expect: 128 }),
+          B: mel(bars(P_U, hey), { expect: 64 }),
+        } },
+      { name: 'ARP', preset: 'arpglass', color: '#b58cff', vol: 0.3, rev: 0.25, dly: 0.25, pan: -0.3,
+        pats: {
+          A: arp(P_B.map((c) => [c, 16]), { low: 'G4', rate: 1, len: 1, order: [0, 1, 2, 1, 0, 1, 2, 3], vel: 0.45, acc: 0.6, accEvery: 4 }),
+          B: arp(P_T.map((c) => [c, 16]), { low: 'G4', rate: 4, len: 4, order: [0, 2, 1, 3], vel: 0.5, acc: 0.6, accEvery: 8 }),
+        } },
+      { name: 'BELLS', preset: 'bells', color: '#ffffff', vol: 0.28, rev: 0.4, dly: 0.3, pan: 0.4,
+        pats: {
+          A: arp(P_T.map((c) => [c, 16]), { low: 'G5', rate: 4, len: 3, order: [0, 2, 1, 3], vel: 0.5, acc: 0.6, accEvery: 8 }),
+        } },
+    ],
+    sections: [
+      ['Intro', 4, { POLKA: 'A', TUBA: 'A', ACCORD: 'A', LEAD: 'H' }],
+      ['Polka A', 8, { POLKA: 'B', TUBA: 'B', ACCORD: 'B', LEAD: 'A', CLARINET: 'A' }],
+      ['Polka A, answered', 8, { POLKA: 'C', TUBA: 'B', ACCORD: 'B', LEAD: 'B', CLARINET: 'B' }],
+      ['Stomp', 8, { STOMP: 'A', TUBA: 'C', SYNBASS: 'A', ACCORD: 'C', LEAD: 'C', POWER: 'A', BRASS: 'A', ARP: 'A' }],
+      ['Schunkel trio', 8, { POLKA: 'D', TUBA: 'D', ACCORD: 'D', LEAD: 'E', CLARINET: 'C', ARP: 'B', BELLS: 'A', STOMP: 'B' }],
+      ['Prost! break', 8, { STOMP: 'D', TUBA: 'E', ACCORD: 'E', LEAD: 'F', BELLS: 'A' }],
+      ['Polka A, loud', 8, { POLKA: 'C', STOMP: 'E', TUBA: 'B', ACCORD: 'B', LEAD: 'B', CLARINET: 'B', POWER: 'C', ARP: 'A' }],
+      ['Big stomp', 8, { STOMP: 'A', TUBA: 'C', SYNBASS: 'A', ACCORD: 'C', LEAD: 'D', POWER: 'B', BRASS: 'A', ARP: 'A', BELLS: 'A' }],
+      ['Turnaround', 4, { POLKA: 'C', STOMP: 'C', TUBA: 'F', SYNBASS: 'B', ACCORD: 'F', LEAD: 'G', BRASS: 'B' }],
+    ],
+  };
+});
+
+/* ============ ROLLING CASKS SHANTY ============ */
+DSL.register({
+  key: 'rolling-casks-shanty', name: 'Rolling Casks Shanty', style: 'Pirate shanty sea-swing', bpm: 112, swing: 0.2, keyName: 'D dorian', group: 'boozerang', by: 'Sonnet 5.5',
+  desc: 'Boozerang rum docks battle: a hornpipe tin-whistle theme over a 3-3-2 rolling cask beat, concertina and banjo, swelling FM horns for the shout chorus, a sword-fight fiddle solo and wave swells under it all.',
+}, () => {
+  const { mel, drums, times, rep, arp, tr } = DSL;
+  const bars = (list, f) => list.map(f).join(' | ');
+
+  const P_IN = ['Dm', 'C', 'Dm', 'Am'];
+  const P_V = ['Dm', 'C', 'Dm', 'Am', 'Dm', 'C', 'G', 'Dm'];
+  const P_C = ['Dm', 'C', 'G', 'Dm', 'Dm', 'C', 'G', 'Dm'];
+  const P_BR = ['G', 'Am', 'C', 'Dm', 'G', 'Am', 'C', 'A'];
+  const P_S = ['Dm', 'C', 'G', 'Dm', 'Dm', 'C', 'G', 'A'];
+  const P_U = ['Dm', 'C', 'G', 'A'];
+
+  const ROOT = { Dm: 'D2', C: 'C2', G: 'G1', Am: 'A1', A: 'A1' };
+  const CHV = { Dm: 'A3+D4+F4', C: 'G3+C4+E4', G: 'G3+B3+D4', Am: 'A3+C4+E4', A: 'A3+C#4+E4' };
+  const BIG = { Dm: 'A4+D5+F5', C: 'G4+C5+E5', G: 'G4+B4+D5', Am: 'A4+C5+E5', A: 'A4+C#5+E5' };
+
+  const roll = (c) => `${CHV[c]}:3 ${CHV[c]}:3 ${CHV[c]}:2 ${CHV[c]}:3 ${CHV[c]}:3 ${CHV[c]}:2`;
+  const sway = (c) => `${CHV[c]}:8 ${CHV[c]}:6 .:2`;
+  const sea = (c) => { const r = ROOT[c], f = tr(r, 7); return `${r}:3 .:1 ${f}:3 .:1 ${r}:3 .:1 ${f}:2 ${up8(r)}:2`; };
+  const seaRoll = (c) => { const r = ROOT[c], f = tr(r, 7); return `${r}:3 ${f}:3 ${r}:2 ${r}:3 ${f}:3 ${up8(r)}:2`; };
+  const drone = (c) => `${ROOT[c]}:8 ${ROOT[c]}:8`;
+  const horns = (c) => `${BIG[c]}:4 .:12`;
+  const hornsLong = (c) => `${BIG[c]}:16`;
+  const bell = (c) => `${{ Dm: 'D6', C: 'C6', G: 'G5', Am: 'A5', A: 'A5' }[c]}:2 .:14`;
+
+  /* ---- melodies ---- */
+  const WH_A = 'D5:3 E5:1 F5:2 A5:2 G5:3 F5:1 E5:2 D5:2 | E5:3 F5:1 G5:2 E5:2 C5:3 D5:1 E5:2 G5:2 | D5:3 E5:1 F5:2 A5:2 D6:4 C6:2 A5:2 | C6:3 B5:1 A5:2 E5:2 A5:8 | ' +
+    'D5:3 E5:1 F5:2 A5:2 G5:3 F5:1 E5:2 D5:2 | E5:3 G5:1 C6:2 G5:2 E5:3 C5:1 D5:2 E5:2 | B5:3 A5:1 G5:2 B5:2 D6:4 B5:2 G5:2 | A5:3 F5:1 D5:4 .:8';
+  const WH_A2 = 'D6:3 E6:1 F6:2 A5:2 D6:3 C6:1 A5:2 F5:2 | E6:3 D6:1 C6:2 G5:2 E6:3 G5:1 E5:2 C5:2 | D5:3 E5:1 F5:2 A5:2 D6:4 F6:2 D6:2 | E6:3 D6:1 C6:2 A5:2 E5:8 | ' +
+    'D6:3 E6:1 F6:2 A5:2 D6:3 C6:1 A5:2 F5:2 | G5:3 C6:1 E6:2 C6:2 G5:3 E5:1 G5:2 C6:2 | D6:3 B5:1 G5:2 B5:2 D6:3 E6:1 D6:2 B5:2 | A5:2 D6:2 F6:2 D6:2 D6:8';
+  const WH_C = 'A5:2 A5:2 D6:4 A5:2 A5:2 F6:4 | G5:2 G5:2 C6:4 G5:2 G5:2 E6:4 | B5:2 B5:2 D6:4 B5:2 B5:2 G6:4 | F6:4 E6:4 D6:8 | ' +
+    'A5:2 A5:2 D6:4 A5:2 A5:2 F6:4 | E6:2 E6:2 G6:4 E6:2 D6:2 C6:4 | D6:4 B5:4 G5:4 B5:4 | A5:4 F5:4 D5:8';
+  const WH_BR = 'B5:6 A5:2 G5:4 D5:4 | C6:6 B5:2 A5:8 | E6:6 D6:2 C6:4 G5:4 | D6:12 .:4 | B5:6 D6:2 G6:4 D6:4 | C6:4 E6:4 A6:4 E6:4 | G6:4 E6:4 C6:8 | E6:8 A5:8';
+  const WH_IN = '.:48 C5:3 D5:1 E5:2 A5:2 C6:8';
+  const FID = 'D5:1 E5:1 F5:1 A5:1 D6:1 A5:1 F5:1 D5:1 E5:1 F5:1 A5:1 D6:1 F6:1 D6:1 A5:1 F5:1 | ' +
+    'C5:1 E5:1 G5:1 C6:1 E6:1 C6:1 G5:1 E5:1 G5:1 C6:1 E6:1 G6:1 E6:1 C6:1 G5:1 E5:1 | ' +
+    'B4:1 D5:1 G5:1 B5:1 D6:1 B5:1 G5:1 D5:1 G5:1 B5:1 D6:1 G6:1 D6:1 B5:1 G5:1 B5:1 | ' +
+    'A5:1 F5:1 D5:1 F5:1 A5:1 D6:1 A5:1 F5:1 D5:8 | ' +
+    'D6:2 A5:1 F5:1 D6:2 A5:1 F5:1 E6:2 C6:1 A5:1 F6:4 | G5:2 E5:1 C5:1 G5:2 E5:1 C5:1 E6:2 D6:1 C6:1 E6:4 | ' +
+    'D6:2 B5:1 G5:1 D6:2 B5:1 G5:1 G6:2 F6:1 D6:1 B5:4 | E5:2 A5:2 E6:2 A5:2 E6:4 .:4';
+  const U_L = 'D6:3 E6:1 F6:2 A5:2 D6:8 | E6:3 G5:1 C6:2 E6:2 G6:8 | B5:2 D6:2 G6:4 B6:4 G6:4 | E6:4 A5:4 E6:4 A5:4';
+
+  /* ---- drums ---- */
+  const casks = { BD: 'x.......x.......', SD: '....x.......x...', LT: 'g..x..g.g..x..x.', CH: 'x.x.x.x.x.x.x.x.', CB: 'x...............' };
+  const casksB = { BD: 'x.......x.......', CP: '....x.......x...', LT: 'x..x..x.x..x..x.', MT: '.....g.......g..', CH: 'x.x.x.x.x.x.x.x.' };
+  const casksFill = { BD: 'x.......x.......', SD: '....x...x..x.xXX', LT: 'g..x..g.........', HT: '..........x.....', MT: '............x...', CH: 'x.x.x.x.x.x.....' };
+  const intro = { LT: 'x..x..x.x..x..x.', CB: 'x...............' };
+  const introF = { LT: 'x..x..x.x..x..x.', MT: '..............xx', SD: '..........xxxxxx' };
+  const shout = { BD: 'x...x...x...x...', CP: '....x.......x...', SD: '....x.......x...', LT: 'x..x..x.x..x..x.', OH: '..x...x...x...x.', CB: 'x...............' };
+  const shoutFill = { BD: 'x...x...x...x...', SD: '....x...x.x.xxXX', LT: 'x..x..x.........', MT: '..........x.....', HT: '............x...', CP: '....x...........' };
+  const swayD = { BD: 'x.......x.......', RS: '....x.......x...', SH: 'o.o.o.o.o.o.o.o.', LT: 'g.....g.........' };
+  const fight = { BD: 'x...x...x...x...', SD: '....x.......x...', CH: 'xxxxxxxxxxxxxxxx', LT: 'x..x..x.x..x..x.', CB: 'x.......x.......' };
+  const turn = [{ BD: 'x...x...x...x...', SD: '....x.......x...', LT: 'x..x..x.x..x..x.' }, { BD: 'x...x...x...x...', SD: '....x...x...x...', LT: 'x..x..x.x..x..x.' },
+    { BD: 'x...x...x...x...', SD: '....x...x.x.x.x.' }, { BD: 'x...x...x...x...', SD: 'xxxxxxxxxxxxXXXX', CY: '................' }];
+
+  return {
+    name: 'Rolling Casks Shanty', bpm: 112, swing: 0.2, key: { root: 2, scale: 'dorian' },
+    fx: { revSize: 0.5, revLvl: 0.36, dlyDiv: '1/8d', dlyFb: 0.3, dlyTone: 0.45, dlyLvl: 0.28, gateLvl: 0.5, comp: 0.45, vol: 0.74 },
+    tracks: [
+      { name: 'DRUMS', type: 'drum', kit: 'boombox', color: '#ff5a36', vol: 0.76, rev: 0.08,
+        voices: { BD: { lvl: 0.85, dec: 0.6 }, SD: { lvl: 0.62 }, CP: { lvl: 0.55 }, CH: { lvl: 0.3 }, OH: { lvl: 0.34 }, LT: { lvl: 0.8, tune: -3, dec: 1.4 }, MT: { lvl: 0.7, tune: -3, dec: 1.2 }, HT: { lvl: 0.65, tune: -2 }, CB: { lvl: 0.34, tune: -3 }, RS: { lvl: 0.4 }, SH: { lvl: 0.3 }, CY: { lvl: 0.42 } },
+        pats: {
+          A: drums([intro, intro, intro, introF]),
+          B: drums(times(casks, 7).concat([casksFill])),
+          C: drums(times(casksB, 7).concat([casksFill])),
+          D: drums([Object.assign({}, shout, { CY: 'X...............' })].concat(times(shout, 6), [shoutFill])),
+          E: drums(times(swayD, 8)),
+          F: drums(times(fight, 7).concat([shoutFill])),
+          G: drums(turn),
+        } },
+      { name: 'BASS', preset: 'pickbass', color: '#3ce6ff', vol: 0.7, rev: 0.03,
+        pats: {
+          A: mel(bars(P_IN, sea), { expect: 64 }),
+          B: mel(bars(P_V, sea), { expect: 128 }),
+          C: mel(bars(P_C, seaRoll), { expect: 128 }),
+          D: mel(bars(P_BR, drone), { expect: 128 }),
+          E: mel(bars(P_S, seaRoll), { expect: 128 }),
+          F: mel(bars(P_U, seaRoll), { expect: 64 }),
+        } },
+      { name: 'CONCERTINA', preset: 'stab', color: '#ff9a3c', vol: 0.4, rev: 0.22, pan: -0.2, synth: { w1: 'saw', l1: 0.7, w2: 'saw', l2: 0.7, det2: 14, cut: 2000, fenv: 500, a: 0.01, d: 0.3, s: 0.7, r: 0.06, uni: 1 },
+        pats: {
+          A: mel(bars(P_IN, roll), { expect: 64 }),
+          B: mel(bars(P_V, roll), { expect: 128 }),
+          C: mel(bars(P_C, roll), { expect: 128 }),
+          D: mel(bars(P_BR, sway), { expect: 128 }),
+          E: mel(bars(P_S, roll), { expect: 128 }),
+          F: mel(bars(P_U, roll), { expect: 64 }),
+        } },
+      { name: 'LEAD WHISTLE', preset: 'whistle', color: '#ff3d9a', vol: 0.5, rev: 0.25, dly: 0.25, pan: 0.1, synth: { vib: 26, cut: 6000 },
+        pats: {
+          A: mel(WH_A, { expect: 128 }),
+          B: mel(WH_A2, { expect: 128 }),
+          C: mel(WH_C, { expect: 128 }),
+          D: mel(WH_BR, { expect: 128 }),
+          E: mel(WH_IN, { expect: 64 }),
+          F: mel(U_L, { expect: 64 }),
+        } },
+      { name: 'RIFF FIDDLE', preset: 'staccato', color: '#ff7a3d', vol: 0.42, rev: 0.2, dly: 0.2, pan: 0.2, synth: { vib: 14, cut: 3600 },
+        pats: { A: mel(FID, { expect: 128 }) } },
+      { name: 'HORNS', preset: 'fmbrass', color: '#ffd23a', vol: 0.44, rev: 0.25, pan: -0.1,
+        pats: {
+          A: mel(bars(P_V, horns), { expect: 128 }),
+          B: mel(bars(P_C, hornsLong), { expect: 128 }),
+          D: mel(bars(P_U, horns), { expect: 64 }),
+        } },
+      { name: 'BRASS', preset: 'brass', color: '#ffb02e', vol: 0.4, rev: 0.22, pan: 0.15,
+        pats: {
+          A: mel(WH_C, { expect: 128 }),
+          B: mel(bars(P_S, (c) => `.:2 ${BIG[c]}:2 .:4 ${BIG[c]}:2 .:2 ${BIG[c]}:4`), { expect: 128 }),
+        } },
+      { name: 'BANJO', preset: 'pluck', color: '#5dffb4', vol: 0.34, rev: 0.18, dly: 0.2, pan: -0.35, synth: { cut: 900, res: 0.25 },
+        pats: {
+          A: arp(P_V.map((c) => [c, 16]), { low: 'D4', rate: 2, len: 1, order: [0, 2, 1, 2, 3, 2, 1, 2], vel: 0.5, acc: 0.7, accEvery: 4 }),
+          B: arp(P_C.map((c) => [c, 16]), { low: 'D4', rate: 1, len: 1, order: [0, 1, 2, 1], vel: 0.45, acc: 0.65, accEvery: 4 }),
+        } },
+      { name: 'WAVES', preset: 'windsweep', color: '#6fa8ff', vol: 0.3, rev: 0.45, pan: 0.3,
+        pats: { A: mel('D3:32 .:32', { expect: 64 }), B: mel('.:32 D3:32', { expect: 64 }) } },
+      { name: 'BELL', preset: 'bells', color: '#ffffff', vol: 0.24, rev: 0.45, dly: 0.35, pan: 0.4,
+        pats: {
+          A: mel(bars(P_IN, bell), { expect: 64 }),
+          B: mel(bars(P_BR, bell), { expect: 128 }),
+        } },
+      { name: 'PAD', preset: 'cinebrass', color: '#b58cff', vol: 0.26, rev: 0.4,
+        pats: {
+          A: mel(bars(P_BR, (c) => `${BIG[c]}:16`), { expect: 128 }),
+          B: mel(bars(P_S, (c) => `${BIG[c]}:16`), { expect: 128 }),
+          C: mel(bars(P_C, (c) => `${BIG[c]}:16`), { expect: 128 }),
+        } },
+    ],
+    sections: [
+      ['Fog on the dock', 4, { DRUMS: 'A', BASS: 'A', CONCERTINA: 'A', 'LEAD WHISTLE': 'E', WAVES: 'A', BELL: 'A' }],
+      ['Hornpipe', 8, { DRUMS: 'B', BASS: 'B', CONCERTINA: 'B', 'LEAD WHISTLE': 'A', BANJO: 'A', WAVES: 'B' }],
+      ['Hornpipe, answered', 8, { DRUMS: 'C', BASS: 'B', CONCERTINA: 'B', 'LEAD WHISTLE': 'B', HORNS: 'A', BANJO: 'A' }],
+      ['Shout chorus', 8, { DRUMS: 'D', BASS: 'C', CONCERTINA: 'C', 'LEAD WHISTLE': 'C', HORNS: 'B', BRASS: 'A', BANJO: 'B', WAVES: 'A' }],
+      ['Sway on the swell', 8, { DRUMS: 'E', BASS: 'D', CONCERTINA: 'D', 'LEAD WHISTLE': 'D', PAD: 'A', BELL: 'B', WAVES: 'B' }],
+      ['Sword-fight fiddle', 8, { DRUMS: 'F', BASS: 'E', CONCERTINA: 'E', 'RIFF FIDDLE': 'A', BRASS: 'B', BANJO: 'B', PAD: 'B' }],
+      ['Shout chorus, last', 8, { DRUMS: 'D', BASS: 'C', CONCERTINA: 'C', 'LEAD WHISTLE': 'C', HORNS: 'B', BRASS: 'A', 'RIFF FIDDLE': 'A', BANJO: 'B', WAVES: 'A', PAD: 'C' }],
+      ['Turn for the tide', 4, { DRUMS: 'G', BASS: 'F', CONCERTINA: 'F', 'LEAD WHISTLE': 'F', HORNS: 'D', WAVES: 'B' }],
+    ],
+  };
+});
+
+/* ============ SHOJI SCREEN FUNK ============ */
+DSL.register({
+  key: 'shoji-screen-funk', name: 'Shoji Screen Funk', style: 'Taiko city-pop funk', bpm: 116, swing: 0.2, keyName: 'A minor', group: 'boozerang', by: 'Sonnet 5.5',
+  desc: 'Boozerang sake house battle: slap bass and tine e-piano city-pop over thundering taiko, kane bells and wooden clappers. Koto and shakuhachi play the hirajoshi scale (A B C E F), the brass stabs answer the drums, and a taiko call-and-response break leads into a sunset bridge.',
+}, () => {
+  const { mel, drums, times, rep, arp, tr } = DSL;
+  const bars = (list, f) => list.map(f).join(' | ');
+
+  const P_IN = ['Am7', 'F6', 'G', 'E7'];
+  const P_V = ['Am7', 'F6', 'G', 'Em7', 'Am7', 'F6', 'G', 'E7'];
+  const P_C = ['F6', 'G', 'Em7', 'Am7', 'F6', 'G', 'E7', 'Am7'];
+  const P_T = ['Am7', 'Am7', 'G', 'G', 'Am7', 'Am7', 'G', 'E7'];
+  const P_BR = ['Dm7', 'Em7', 'F6', 'G', 'Dm7', 'Em7', 'F6', 'E7'];
+  const P_U = ['F6', 'G', 'Am7', 'E7'];
+
+  const ROOT = { Am7: 'A1', F6: 'F1', G: 'G1', Em7: 'E1', E7: 'E1', Dm7: 'D2', Cmaj7: 'C2' };
+  const EPV = { Am7: 'A3+C4+E4+G4', F6: 'F3+A3+C4+D4', G: 'G3+B3+D4+E4', Em7: 'E3+G3+B3+D4', E7: 'E3+G#3+B3+D4', Dm7: 'D3+F3+A3+C4', Cmaj7: 'C3+E3+G3+B3' };
+  const BRV = { Am7: 'C5+E5+A5', F6: 'A4+C5+F5', G: 'B4+D5+G5', Em7: 'B4+E5+G5', E7: 'B4+D5+G#5', Dm7: 'A4+D5+F5', Cmaj7: 'B4+E5+G5' };
+  const GTV = { Am7: 'E4+A4+C5', F6: 'D4+A4+C5', G: 'D4+G4+B4', Em7: 'E4+G4+B4', E7: 'D4+G#4+B4', Dm7: 'D4+F4+A4', Cmaj7: 'E4+G4+B4' };
+
+  const slapA = (c) => { const r = ROOT[c], f = tr(r, 7); return `${r}:3 ${r}:1 .:2 ${up8(r)}:2 ${r}:2 .:1 ${f}:1 ${r}:2 .:2`; };
+  const slapB = (c) => { const r = ROOT[c], f = tr(r, 7); return `${r}:2 ${r}:2 .:2 ${up8(r)}:1 ${r}:1 ${f}:2 .:2 ${r}:2 ${up8(r)}:2`; };
+  const pedal = (c) => { const r = ROOT[c]; return `${r}:6 .:2 ${r}:6 ${up8(r)}:2`; };
+  const epA = (c) => `${EPV[c]}:3 ${EPV[c]}:3 .:2 ${EPV[c]}:2 .:2 ${EPV[c]}:2 .:2`;
+  const gtr = (c) => rep(`${GTV[c]}:1 .:1 ${GTV[c]}:1 ${GTV[c]}:1 .:1 ${GTV[c]}:1 .:2`, 2);
+  const brass = (c) => `${BRV[c]}:2 .:1 ${BRV[c]}:1 .:2 ${BRV[c]}:2 .:1 ${BRV[c]}:1 .:2 ${BRV[c]}:2 .:2`;
+  const padv = (c) => `${EPV[c]}:16`;
+
+  /* ---- melodies ---- */
+  const SH_V = 'E5:6 A5:2 C6:8 | C6:6 A5:2 F5:8 | B5:6 A5:2 B5:4 E5:4 | E5:8 B5:8 | ' +
+    'A5:4 C6:4 E6:4 C6:4 | F6:8 E6:4 C6:4 | B5:4 A5:4 B5:8 | E6:12 B5:4';
+  const SH_V2 = 'C6:6 E6:2 A6:8 | A5:4 C6:4 F6:8 | D6:6 B5:2 G5:8 | B5:8 E6:4 B5:4 | ' +
+    'E6:6 C6:2 A5:8 | C6:6 A5:2 F6:8 | D6:4 B5:4 D6:8 | E6:8 B5:4 E6:4';
+  const SH_C = 'A5:8 F5:8 | B5:8 D6:8 | G5:8 B5:8 | C6:8 E6:8 | A5:8 C6:8 | D6:8 B5:8 | B5:8 E6:8 | E6:8 A5:8';
+  const SH_BR = 'D6:8 F6:4 E6:4 | E6:6 B5:2 G5:8 | A5:4 C6:4 F6:8 | D6:6 B5:2 G5:8 | F6:6 E6:2 D6:8 | G6:6 E6:2 B5:8 | C6:4 E6:4 A6:8 | B5:8 E6:8';
+  const LD_C = 'C6:3 C6:1 A5:2 C6:2 E6:4 C6:2 A5:2 | B5:3 B5:1 E6:2 B5:2 A5:4 .:4 | E6:3 B5:1 G5:2 B5:2 E6:8 | C6:3 E6:1 A6:4 E6:4 C6:4 | ' +
+    'A5:3 C6:1 E6:2 C6:2 F6:4 E6:2 C6:2 | D6:3 B5:1 G5:2 B5:2 D6:8 | B5:3 B5:1 E6:4 B5:4 E6:4 | A5:8 C6:2 E6:2 A5:4';
+  const LD_C2 = LD_C.replace('A5:8 C6:2 E6:2 A5:4', 'A5:4 C6:4 E6:4 A6:4');
+  const LD_V = '.:16 | E6:2 .:2 C6:2 .:2 A5:4 .:4 | .:16 | G5:2 .:2 B5:2 .:2 E6:4 .:4 | .:16 | A5:2 .:2 C6:2 .:2 F6:4 .:4 | .:16 | B5:2 B5:2 B5:2 E6:2 E6:8';
+  const RIFF = 'A5:2 .:1 A5:1 C6:2 .:2 E6:2 .:1 C6:1 A5:4 | A5:2 .:1 A5:1 C6:2 .:2 E6:2 .:1 C6:1 A5:4 | ' +
+    'B5:2 .:1 B5:1 D6:2 .:2 G6:2 .:1 D6:1 B5:4 | B5:2 .:1 B5:1 D6:2 .:2 G6:2 .:1 D6:1 B5:4 | ' +
+    'A5:2 .:1 A5:1 C6:2 .:2 E6:2 .:1 C6:1 A5:4 | A5:2 .:1 A5:1 C6:2 .:2 E6:2 .:1 C6:1 E6:4 | ' +
+    'B5:2 .:1 B5:1 D6:2 .:2 G6:2 .:1 D6:1 B5:4 | E6:2 E6:2 E6:2 E6:2 E6:8';
+  const UT = 'C6:3 A5:1 C6:4 E6:8 | D6:3 B5:1 D6:4 G6:8 | E6:4 C6:4 A5:8 | B5:2 B5:2 B5:2 B5:2 B5:2 B5:2 B5:2 B5:2';
+
+  /* ---- drums ---- */
+  const taikoHeart = { LT: 'x.......x...x...', RS: 'X...............', CB: '................' };
+  const taikoMats = { LT: 'x...x.x.x...x.x.', HT: '..x...x...x...x.', RS: 'X...............', CB: 'x.x.x.x.x.x.x.x.' };
+  const taikoFill = { LT: 'x...x.x.x.......', MT: '..........xx....', HT: '............xxxx', RS: '................', CB: 'x.x.x.x.x.x.....' };
+  const taikoTune = { LT: 'x.....x.x.....x.', MT: '..x.........x...', HT: '......g.....g...', CB: '..x...x...x...x.' };
+  const call1 = { LT: 'x...x.x.x...x.x.', HT: 'g.g.g.g.g.g.g.g.' };
+  const call2 = { MT: 'x.x.x.x.x.x.x.x.', HT: '..x...x...x...x.', LT: '................' };
+  const callU = { LT: 'x.x.x.x.x.x.x.x.', MT: 'x.x.x.x.x.x.x.x.', HT: '..x...x...x...x.', CY: 'X...............' };
+  const funk = { BD: 'x.....x...x...x.', SD: '....x..g...gx..g', CH: 'xgxgxgxgxgxgxgxg', OH: '..............x.' };
+  const funkB = { BD: 'x....x..x.x....x', SD: '....x..g...gx..g', CH: 'xgxgxgxgxgxgxgxg', OH: '..x...........x.' };
+  const funkFill = { BD: 'x.....x...x...x.', SD: '....x..g....xxXX', CH: 'xgxgxgxgxg......', HT: '..........x.....', MT: '............x...', LT: '..............X.' };
+  const funkIn = Object.assign({}, funk, { CY: 'X...............' });
+  const soft = { BD: 'x.......x.......', RS: '....x.......x...', CH: 'x.x.x.x.x.x.x.x.' };
+  const turn = [{ BD: 'x.....x...x...x.', SD: '....x...x...x...', CH: 'xgxgxgxgxgxgxgxg' }, { BD: 'x.....x...x...x.', SD: '....x...x.x.x.x.', CH: 'xgxgxgxgxgxgxgxg' },
+    { BD: 'x...x...x...x...', SD: 'x.x.x.x.xxxxxxxx' }, { BD: 'x...x...x...x...', SD: 'xxxxxxxxxxxxXXXX', CY: '................' }];
+
+  return {
+    name: 'Shoji Screen Funk', bpm: 116, swing: 0.2, key: { root: 9, scale: 'minor' },
+    fx: { revSize: 0.5, revLvl: 0.36, dlyDiv: '1/8d', dlyFb: 0.3, dlyTone: 0.5, dlyLvl: 0.3, gateLvl: 0.65, comp: 0.45, vol: 0.67 },
+    tracks: [
+      { name: 'TAIKO', type: 'drum', kit: 'boombox', color: '#ff5a36', vol: 0.8, rev: 0.12,
+        voices: { LT: { lvl: 0.95, tune: -5, dec: 1.7 }, MT: { lvl: 0.8, tune: -3, dec: 1.3 }, HT: { lvl: 0.7, tune: 0, dec: 0.9 }, RS: { lvl: 0.8, tune: 2 }, CB: { lvl: 0.34, tune: 8, dec: 0.5 }, CY: { lvl: 0.5 } },
+        pats: {
+          A: drums([taikoHeart, taikoHeart, taikoMats, taikoFill]),
+          B: drums(times(taikoMats, 7).concat([taikoFill])),
+          C: drums(times(taikoTune, 7).concat([taikoFill])),
+          D: drums([call1, call1, call2, call2, call1, call2, callU, { LT: 'x.x.x.x.x.x.x.x.', MT: 'x.x.x.x.x.x.x.x.', HT: 'xxxxxxxxxxxxXXXX' }]),
+          E: drums(times({ LT: 'x.......x.......', RS: 'X...............' }, 8)),
+          F: drums(times(taikoHeart, 3).concat([taikoFill])),
+        } },
+      { name: 'DRUMS', type: 'drum', kit: 'club', color: '#ffd23a', vol: 0.72, rev: 0.05,
+        voices: { BD: { lvl: 0.85 }, SD: { lvl: 0.6, gate: 0.2 }, CH: { lvl: 0.3 }, OH: { lvl: 0.3 }, CY: { lvl: 0.42 }, HT: { lvl: 0.5 }, MT: { lvl: 0.5 }, LT: { lvl: 0.55 }, RS: { lvl: 0.4 } },
+        pats: {
+          A: drums([{}, {}, funk, funkFill]),
+          B: drums([funkIn].concat(times(funk, 6), [funkFill])),
+          C: drums(times(funkB, 7).concat([funkFill])),
+          D: drums(times(soft, 8)),
+          E: drums(turn),
+          F: drums(times(funk, 7).concat([funkFill])),
+        } },
+      { name: 'BASS', preset: 'pickbass', color: '#3ce6ff', vol: 0.72, rev: 0.03, synth: { cut: 1500 },
+        pats: {
+          A: mel('.:32 ' + bars(P_IN.slice(2), slapA), { expect: 64 }),
+          B: mel(bars(P_V, slapA), { expect: 128 }),
+          C: mel(bars(P_C, slapB), { expect: 128 }),
+          D: mel(bars(P_T, pedal), { expect: 128 }),
+          E: mel(bars(P_BR, (c) => `${ROOT[c]}:8 ${ROOT[c]}:8`), { expect: 128 }),
+          F: mel(bars(P_U, slapB), { expect: 64 }),
+          G: mel(bars(P_V, slapB), { expect: 128 }),
+        } },
+      { name: 'EPIANO', preset: 'epiano', color: '#b58cff', vol: 0.44, rev: 0.28, pan: -0.2,
+        pats: {
+          A: mel('.:32 ' + bars(P_IN.slice(2), epA), { expect: 64 }),
+          B: mel(bars(P_V, epA), { expect: 128 }),
+          C: mel(bars(P_C, epA), { expect: 128 }),
+          D: mel(bars(P_BR, (c) => `${EPV[c]}:6 .:2 ${EPV[c]}:6 .:2`), { expect: 128 }),
+          E: mel(bars(P_U, epA), { expect: 64 }),
+          F: mel(bars(P_T, epA), { expect: 128 }),
+        } },
+      { name: 'GUITAR', preset: 'brightpoly', color: '#ff9a3c', vol: 0.3, rev: 0.1, pan: 0.35, synth: { d: 0.1, s: 0, r: 0.06, fd: 0.08, cut: 1800 },
+        pats: {
+          A: mel(bars(P_V, gtr), { expect: 128 }),
+          B: mel(bars(P_C, gtr), { expect: 128 }),
+          C: mel(bars(P_T, gtr), { expect: 128 }),
+        } },
+      { name: 'BRASS', preset: 'brass', color: '#ffb02e', vol: 0.42, rev: 0.2, pan: -0.1,
+        pats: {
+          A: mel(bars(P_C, brass), { expect: 128 }),
+          B: mel(bars(P_U, brass), { expect: 64 }),
+          C: mel(bars(P_T, (c) => `${BRV[c]}:2 .:2 ${BRV[c]}:2 .:2 ${BRV[c]}:2 .:2 ${BRV[c]}:4`), { expect: 128 }),
+        } },
+      { name: 'LEAD', preset: 'outrun', color: '#ff3d9a', vol: 0.5, rev: 0.22, dly: 0.25, pan: 0.05, synth: { vib: 12 },
+        pats: {
+          A: mel(LD_C, { expect: 128 }),
+          B: mel(LD_C2, { expect: 128 }),
+          C: mel(LD_V, { expect: 128 }),
+          D: mel(UT, { expect: 64 }),
+        } },
+      { name: 'LEAD SHAKU', preset: 'whistle', color: '#ff7a3d', vol: 0.5, rev: 0.32, dly: 0.25, pan: 0.15, synth: { noise: 0.09, cut: 3200, vib: 30, vibDelay: 0.15, a: 0.05, glide: 0.09 },
+        pats: {
+          A: mel(SH_V, { expect: 128 }),
+          B: mel(SH_V2, { expect: 128 }),
+          C: mel(SH_BR, { expect: 128 }),
+          D: mel(SH_C, { expect: 128 }),
+        } },
+      { name: 'KOTO', preset: 'pluck', color: '#5dffb4', vol: 0.36, rev: 0.3, dly: 0.28, pan: -0.3, synth: { cut: 2600, res: 0.2, fd: 0.2, d: 0.5 },
+        pats: {
+          A: arp(P_V.map((c) => [c, 16]), { low: 'A4', rate: 2, len: 2, order: [0, 1, 2, 3, 2, 1, 2, 1], vel: 0.5, acc: 0.7, accEvery: 4 }),
+          B: arp(P_BR.map((c) => [c, 16]), { low: 'A4', rate: 4, len: 4, order: [0, 2, 1, 3], vel: 0.5, acc: 0.65, accEvery: 8 }),
+          C: arp(P_C.map((c) => [c, 16]), { low: 'A4', rate: 1, len: 1, order: [0, 1, 2, 3, 2, 1, 3, 2], vel: 0.38, acc: 0.55, accEvery: 4 }),
+        } },
+      { name: 'RIFF STAB', preset: 'staccato', color: '#ff3d9a', vol: 0.46, rev: 0.16, dly: 0.2, pan: 0.1,
+        pats: { A: mel(RIFF, { expect: 128 }) } },
+      { name: 'PAD', preset: 'glasspad', color: '#6fa8ff', vol: 0.3, rev: 0.45,
+        pats: {
+          A: mel(bars(P_C, padv), { expect: 128 }),
+          B: mel(bars(P_BR, padv), { expect: 128 }),
+          C: mel(bars(P_V, padv), { expect: 128 }),
+        } },
+    ],
+    sections: [
+      ['Matsuri intro', 4, { TAIKO: 'A', DRUMS: 'A', BASS: 'A', EPIANO: 'A' }],
+      ['Verse 1', 8, { TAIKO: 'C', DRUMS: 'C', BASS: 'G', EPIANO: 'B', GUITAR: 'A', 'LEAD SHAKU': 'A', KOTO: 'A', PAD: 'C' }],
+      ['Chorus 1', 8, { TAIKO: 'B', DRUMS: 'B', BASS: 'C', EPIANO: 'C', GUITAR: 'B', BRASS: 'A', LEAD: 'A', KOTO: 'C', PAD: 'A' }],
+      ['Verse 2', 8, { TAIKO: 'C', DRUMS: 'C', BASS: 'B', EPIANO: 'B', GUITAR: 'A', 'LEAD SHAKU': 'B', LEAD: 'C', KOTO: 'A', PAD: 'C' }],
+      ['Chorus 2', 8, { TAIKO: 'B', DRUMS: 'F', BASS: 'C', EPIANO: 'C', GUITAR: 'B', BRASS: 'A', LEAD: 'B', KOTO: 'C', PAD: 'A' }],
+      ['Taiko battle', 8, { TAIKO: 'D', DRUMS: 'D', BASS: 'D', EPIANO: 'F', GUITAR: 'C', BRASS: 'C', 'RIFF STAB': 'A' }],
+      ['Shoji sunset', 8, { TAIKO: 'E', DRUMS: 'D', BASS: 'E', EPIANO: 'D', 'LEAD SHAKU': 'C', KOTO: 'B', PAD: 'B' }],
+      ['Final chorus', 8, { TAIKO: 'B', DRUMS: 'B', BASS: 'C', EPIANO: 'C', GUITAR: 'B', BRASS: 'A', LEAD: 'B', 'LEAD SHAKU': 'D', KOTO: 'C', PAD: 'A' }],
+      ['Turnaround', 4, { TAIKO: 'F', DRUMS: 'E', BASS: 'F', EPIANO: 'E', BRASS: 'B', LEAD: 'D' }],
+    ],
+  };
+});
+
+/* ============ GLUHWEIN GALLOP ============ */
+DSL.register({
+  key: 'gluhwein-gallop', name: 'Gluhwein Gallop', style: 'Jingly synth chase', bpm: 152, keyName: 'E minor', group: 'boozerang', by: 'Sonnet 5.5',
+  desc: 'Boozerang apres-ski mulled-wine battle: a galloping sequencer bass, hoofbeat rimshots and sleigh bells chase a bouncy minor theme that bursts into a major-key chorus of brass and bells. A cozy lodge break and a rising chase keep it festive and fast.',
+}, () => {
+  const { mel, drums, times, rep, arp } = DSL;
+  const bars = (list, f) => list.map(f).join(' | ');
+
+  const P_IN = ['Em', 'Em', 'D', 'B7'];
+  const P_A = ['Em', 'Em', 'C', 'D', 'Em', 'Em', 'C', 'B7'];
+  const P_B = ['G', 'D', 'Em', 'C', 'G', 'D', 'C', 'D'];
+  const P_C = ['Am', 'B7', 'Em', 'C', 'Am', 'B7', 'Em', 'B7'];
+  const P_K = ['C', 'G', 'Am', 'Em', 'C', 'D', 'G', 'D'];
+  const P_D = ['Em', 'D', 'C', 'B7', 'Em', 'D', 'C', 'B7'];
+  const P_U = ['C', 'D', 'B7', 'B7'];
+
+  const ROOT = { Em: 'E2', C: 'C2', D: 'D2', B7: 'B1', G: 'G1', Am: 'A1' };
+  const ST = { Em: 'B4+E5+G5', C: 'C5+E5+G5', D: 'A4+D5+F#5', B7: 'B4+D#5+F#5+A5', G: 'B4+D5+G5', Am: 'C5+E5+A5' };
+  const SV = { Em: 'B3+E4+G4', C: 'C4+E4+G4', D: 'A3+D4+F#4', B7: 'B3+D#4+F#4+A4', G: 'B3+D4+G4', Am: 'A3+C4+E4' };
+
+  const gallop = (c) => { const r = ROOT[c], R = up8(r); return `${r}:2 ${r}:1 ${r}:1 ${r}:2 ${r}:1 ${R}:1 ${r}:2 ${r}:1 ${r}:1 ${r}:2 ${R}:1 ${r}:1`; };
+  const gallopHi = (c) => { const r = ROOT[c], R = up8(r); return `${r}:2 ${R}:1 ${r}:1 ${r}:2 ${R}:1 ${r}:1 ${r}:2 ${R}:1 ${r}:1 ${r}:2 ${R}:1 ${R}:1`; };
+  const half = (c) => `${ROOT[c]}:8 ${ROOT[c]}:6 ${up8(ROOT[c])}:2`;
+  const stab = (c) => `.:4 ${ST[c]}:2 .:2 .:4 ${ST[c]}:2 .:2`;
+  const stabOff = (c) => rep(`.:2 ${ST[c]}:1 .:1`, 4);
+  const swell = (c) => `${SV[c]}:16`;
+  const bellChord = (c) => `${ST[c]}:3 .:1 ${ST[c]}:3 .:1 ${ST[c]}:3 .:1 ${ST[c]}:3 .:1`;
+
+  /* ---- melodies ---- */
+  const T_A = 'B5:2 B5:2 E6:4 D6:2 B5:2 G5:4 | A5:2 B5:2 D6:2 B5:2 G5:4 E5:4 | E6:2 E6:2 C6:4 G5:2 C6:2 E6:4 | D6:2 D6:2 A5:4 F#5:2 A5:2 D6:4 | ' +
+    'B5:2 B5:2 E6:4 D6:2 B5:2 G5:4 | A5:2 B5:2 D6:2 B5:2 E6:8 | G6:2 E6:2 C6:4 E6:2 G6:2 E6:4 | B5:2 B5:2 F#6:4 A5:2 B5:2 F#5:4';
+  const T_A2 = 'E6:2 E6:2 G6:4 F#6:2 E6:2 B5:4 | D6:2 D6:2 E6:2 D6:2 B5:4 G5:4 | G6:2 G6:2 E6:4 C6:2 E6:2 G6:4 | F#6:2 F#6:2 D6:4 A5:2 D6:2 F#6:4 | ' +
+    'E6:2 E6:2 G6:4 F#6:2 E6:2 B5:4 | D6:2 D6:2 E6:2 D6:2 G6:8 | E6:2 G6:2 E6:2 C6:2 G5:4 C6:4 | B5:2 B5:2 F#6:4 A5:2 F#5:2 B5:4';
+  const T_B = 'B5:4 B5:2 D6:2 G6:4 D6:4 | A5:4 A5:2 D6:2 F#6:4 D6:4 | G5:4 G5:2 B5:2 E6:4 B5:4 | E6:4 D6:2 C6:2 G5:8 | ' +
+    'B5:4 B5:2 D6:2 G6:4 D6:4 | A5:4 A5:2 D6:2 F#6:4 D6:4 | E6:4 G6:4 E6:4 C6:4 | D6:2 D6:2 D6:2 D6:2 A5:8';
+  const T_B2 = 'D6:4 D6:2 G6:2 B6:4 G6:4 | D6:4 D6:2 F#6:2 A6:4 F#6:4 | B5:4 B5:2 E6:2 G6:4 E6:4 | G6:4 E6:2 C6:2 E6:8 | ' +
+    'D6:4 D6:2 G6:2 B6:4 G6:4 | F#6:4 F#6:2 A6:2 D7:4 A6:4 | G6:4 B6:4 G6:4 E6:4 | F#6:2 F#6:2 F#6:2 F#6:2 D6:8';
+  const C_L = 'A5:4 C6:4 E6:4 A6:4 | B5:4 D#6:4 F#6:4 B6:4 | E6:4 B5:4 G5:4 B5:4 | C6:4 E6:4 G6:4 E6:4 | ' +
+    'A5:4 C6:4 E6:4 A6:4 | B5:4 D#6:4 F#6:4 A6:4 | G6:4 E6:4 B5:4 E6:4 | F#6:2 F#6:2 F#6:2 F#6:2 F#6:2 F#6:2 F#6:2 F#6:2';
+  const D_L = 'B6:4 G6:4 E6:4 B5:4 | A6:4 F#6:4 D6:4 A5:4 | G6:4 E6:4 C6:4 G5:4 | F#6:4 A5:4 B5:8 | ' +
+    'B6:4 G6:4 E6:4 B5:4 | A6:4 F#6:4 D6:4 A5:4 | G6:4 E6:4 C6:4 E6:4 | F#6:2 A6:2 F#6:2 A6:2 F#6:2 A6:2 F#6:2 A6:2';
+  const K_L = 'E6:8 G6:8 | D6:8 B5:8 | C6:8 E6:8 | G5:8 B5:8 | E6:8 G6:8 | F#6:8 A6:8 | G6:12 .:4 | A6:8 F#6:8';
+  const IN_L = '.:48 B5:2 B5:2 F#6:4 .:8';
+  const UT = 'E6:4 C6:4 G5:4 E5:4 | F#6:4 D6:4 A5:4 F#5:4 | F#6:2 F#6:2 F#6:2 F#6:2 F#6:2 F#6:2 F#6:2 F#6:2 | B5:2 B5:2 B5:2 B5:2 B5:2 B5:2 B5:2 B5:2';
+
+  /* ---- drums ---- */
+  const hoof = { RS: 'x.xxx.xxx.xxx.xx', CB: '..x...x...x...x.' };
+  const hoofIn = { RS: 'x.xxx.xxx.xxx.xx', CB: 'x.x.x.x.x.x.x.x.' };
+  const chase = { BD: 'x...x...x...x...', SD: '....x.......x...', CH: 'x.x.x.x.x.x.x.x.', OH: '..............x.' };
+  const chaseIn = Object.assign({}, chase, { CY: 'X...............' });
+  const chaseFill = { BD: 'x...x...x...x...', SD: '....x...x.x.xxXX', CH: 'x.x.x.x.........', HT: '..........x.....', MT: '............x...', LT: '..............X.' };
+  const chaseB = { BD: 'x...x...x...x...', SD: '....x.......x...', CP: '....x.......x...', CH: 'xxxxxxxxxxxxxxxx', OH: '..x...x...x...x.' };
+  const chaseBIn = Object.assign({}, chaseB, { CY: 'X...............' });
+  const chaseC = { BD: 'x.x.x.x.x.x.x.x.', SD: '....x.......x...', CH: 'xxxxxxxxxxxxxxxx' };
+  const chaseCIn = Object.assign({}, chaseC, { CY: 'X...............' });
+  const lodge = { BD: 'x.......x.......', RS: '....x.......x...', SH: 'o.o.o.o.o.o.o.o.' };
+  const turn = [{ BD: 'x...x...x...x...', SD: '....x.......x...', CH: 'x.x.x.x.x.x.x.x.' }, { BD: 'x...x...x...x...', SD: '....x...x...x...', CH: 'x.x.x.x.x.x.x.x.' },
+    { BD: 'x...x...x...x...', SD: 'x.x.x.x.xxxxxxxx' }, { BD: 'x...x...x...x...', SD: 'xxxxxxxxxxxxXXXX', CY: '................' }];
+  const intro = [{ BD: 'x...............' }, { BD: 'x...x...........' }, { BD: 'x...x...x.......', SD: '..........x.x.x.' }, { BD: 'x...x...x...x...', SD: 'o.o.o.o.xxxxXXXX' }];
+
+  return {
+    name: 'Gluhwein Gallop', bpm: 152, key: { root: 4, scale: 'minor' },
+    fx: { revSize: 0.5, revLvl: 0.36, dlyDiv: '1/8d', dlyFb: 0.3, dlyTone: 0.55, dlyLvl: 0.3, gateLvl: 0.6, comp: 0.45, vol: 0.70 },
+    tracks: [
+      { name: 'DRUMS', type: 'drum', kit: 'club', color: '#ff5a36', vol: 0.76, rev: 0.05,
+        voices: { BD: { lvl: 0.9 }, SD: { lvl: 0.62, gate: 0.2 }, CP: { lvl: 0.6, gate: 0.2 }, CH: { lvl: 0.3 }, OH: { lvl: 0.3 }, CY: { lvl: 0.42 }, HT: { lvl: 0.55 }, MT: { lvl: 0.55 }, LT: { lvl: 0.55 } },
+        pats: {
+          A: drums(intro),
+          B: drums([chaseIn].concat(times(chase, 6), [chaseFill])),
+          C: drums([chaseBIn].concat(times(chaseB, 6), [chaseFill])),
+          D: drums(times(lodge, 8).map((b) => ({ BD: b.BD }))),
+          E: drums([chaseCIn].concat(times(chaseC, 6), [chaseFill])),
+          F: drums(turn),
+        } },
+      { name: 'SLEIGH', type: 'drum', kit: 'studio', color: '#ffd23a', vol: 0.5, rev: 0.1,
+        voices: { RS: { lvl: 0.55, tune: -2 }, CB: { lvl: 0.4, tune: 9, dec: 0.4 }, SH: { lvl: 0.55 } },
+        pats: {
+          A: drums(times(hoofIn, 4)),
+          B: drums(times(hoof, 8)),
+          C: drums(times({ RS: 'x.xxx.xxx.xxx.xx', SH: 'xoxoxoxoxoxoxoxo', CB: 'x.x.x.x.x.x.x.x.' }, 8)),
+          D: drums(times({ SH: 'oxoxoxoxoxoxoxox', CB: 'x...x...x...x...' }, 8)),
+          E: drums(times({ SH: 'xoxoxoxoxoxoxoxo' }, 8)),
+        } },
+      { name: 'BASS', preset: 'seqbass', color: '#3ce6ff', vol: 0.68, rev: 0.02,
+        pats: {
+          A: mel(bars(P_IN, half), { expect: 64 }),
+          B: mel(bars(P_A, gallop), { expect: 128 }),
+          C: mel(bars(P_B, gallop), { expect: 128 }),
+          D: mel(bars(P_C, gallopHi), { expect: 128 }),
+          E: mel(bars(P_K, half), { expect: 128 }),
+          F: mel(bars(P_D, gallopHi), { expect: 128 }),
+          G: mel(bars(P_U, gallop), { expect: 64 }),
+        } },
+      { name: 'LEAD', preset: 'staccato', color: '#ff3d9a', vol: 0.52, rev: 0.22, dly: 0.25, pan: 0.05, synth: { vib: 8 },
+        pats: {
+          A: mel(T_A, { expect: 128 }),
+          B: mel(T_A2, { expect: 128 }),
+          C: mel(T_B, { expect: 128 }),
+          D: mel(T_B2, { expect: 128 }),
+          E: mel(C_L, { expect: 128 }),
+          F: mel(D_L, { expect: 128 }),
+          G: mel(UT, { expect: 64 }),
+          H: mel(K_L, { expect: 128 }),
+          I: mel(IN_L, { expect: 64 }),
+        } },
+      { name: 'BELLS', preset: 'bells', color: '#ffffff', vol: 0.34, rev: 0.4, dly: 0.3, pan: 0.35,
+        pats: {
+          A: mel(T_B, { expect: 128 }),
+          B: arp(P_K.map((c) => [c, 16]), { low: 'C5', rate: 2, len: 2, order: [0, 1, 2, 1, 0, 1, 2, 3], vel: 0.5, acc: 0.65, accEvery: 4 }),
+          C: mel(bars(P_A, bellChord), { expect: 128 }),
+          D: mel(T_B2, { expect: 128 }),
+        } },
+      { name: 'OSTINATO ARP', preset: 'arpglass', color: '#b58cff', vol: 0.3, rev: 0.22, dly: 0.25, pan: -0.3,
+        pats: {
+          A: arp(P_A.map((c) => [c.replace('B7', 'B7'), 16]), { low: 'E4', rate: 1, len: 1, order: [0, 1, 2, 1], vel: 0.42, acc: 0.58, accEvery: 4 }),
+          B: arp(P_C.map((c) => [c, 16]), { low: 'A4', rate: 1, len: 1, order: [0, 1, 2, 3, 2, 1, 2, 1], vel: 0.42, acc: 0.58, accEvery: 4 }),
+          C: arp(P_B.map((c) => [c, 16]), { low: 'G4', rate: 1, len: 1, order: [0, 2, 1, 2], vel: 0.4, acc: 0.55, accEvery: 4 }),
+          D: arp(P_D.map((c) => [c, 16]), { low: 'E4', rate: 1, len: 1, order: [0, 1, 2, 3, 2, 1, 3, 2], vel: 0.42, acc: 0.58, accEvery: 4 }),
+        } },
+      { name: 'BRASS', preset: 'brass', color: '#ffb02e', vol: 0.4, rev: 0.22, pan: -0.15,
+        pats: {
+          A: mel(bars(P_A, stab), { expect: 128 }),
+          B: mel(bars(P_B, stabOff), { expect: 128 }),
+          C: mel(bars(P_C, stab), { expect: 128 }),
+          D: mel(bars(P_D, stab), { expect: 128 }),
+          E: mel(bars(P_U, stabOff), { expect: 64 }),
+        } },
+      { name: 'STRINGS', preset: 'strings', color: '#6fa8ff', vol: 0.32, rev: 0.4,
+        pats: {
+          A: mel(bars(P_B, swell), { expect: 128 }),
+          B: mel(bars(P_K, swell), { expect: 128 }),
+          C: mel(bars(P_C, swell), { expect: 128 }),
+          D: mel(bars(P_U, swell), { expect: 64 }),
+          E: mel(bars(P_IN, swell), { expect: 64 }),
+          F: mel(bars(P_D, swell), { expect: 128 }),
+        } },
+      { name: 'CHOIR', preset: 'choir', color: '#ff9a3c', vol: 0.3, rev: 0.42, pan: 0.1,
+        pats: { A: mel(bars(P_B, (c) => `${ST[c]}:16`), { expect: 128 }) } },
+      { name: 'MARIMBA', preset: 'marimba', color: '#5dffb4', vol: 0.4, rev: 0.22, dly: 0.2, pan: -0.25,
+        pats: {
+          A: arp(P_K.map((c) => [c, 16]), { low: 'C4', rate: 2, len: 1, order: [0, 2, 1, 2, 3, 2, 1, 2], vel: 0.5, acc: 0.7, accEvery: 4 }),
+        } },
+      { name: 'RISER', preset: 'windsweep', color: '#c8f0ff', vol: 0.28, rev: 0.4,
+        pats: { A: mel('E3:64', { expect: 64 }), B: mel('.:32 E3:32', { expect: 64 }) } },
+    ],
+    sections: [
+      ['Hoofbeats', 4, { DRUMS: 'A', SLEIGH: 'A', BASS: 'A', STRINGS: 'E', LEAD: 'I', RISER: 'A' }],
+      ['Chase theme', 8, { DRUMS: 'B', SLEIGH: 'B', BASS: 'B', LEAD: 'A', 'OSTINATO ARP': 'A', BRASS: 'A' }],
+      ['Chase theme 2', 8, { DRUMS: 'B', SLEIGH: 'B', BASS: 'B', LEAD: 'B', BELLS: 'C', 'OSTINATO ARP': 'A', BRASS: 'A' }],
+      ['Mulled chorus', 8, { DRUMS: 'C', SLEIGH: 'C', BASS: 'C', LEAD: 'C', BELLS: 'A', 'OSTINATO ARP': 'C', BRASS: 'B', STRINGS: 'A', CHOIR: 'A' }],
+      ['Lodge fireplace', 8, { DRUMS: 'D', SLEIGH: 'D', BASS: 'E', LEAD: 'H', MARIMBA: 'A', BELLS: 'B', STRINGS: 'B' }],
+      ['Chase builds', 8, { DRUMS: 'E', SLEIGH: 'E', BASS: 'D', LEAD: 'E', 'OSTINATO ARP': 'B', BRASS: 'C', STRINGS: 'C', RISER: 'B' }],
+      ['Downhill', 8, { DRUMS: 'E', SLEIGH: 'C', BASS: 'F', LEAD: 'F', 'OSTINATO ARP': 'D', BRASS: 'D', BELLS: 'C', STRINGS: 'F' }],
+      ['Mulled chorus, last', 8, { DRUMS: 'C', SLEIGH: 'C', BASS: 'C', LEAD: 'D', BELLS: 'D', 'OSTINATO ARP': 'C', BRASS: 'B', STRINGS: 'A', CHOIR: 'A' }],
+      ['Last gondola', 4, { DRUMS: 'F', SLEIGH: 'B', BASS: 'G', LEAD: 'G', BRASS: 'E', STRINGS: 'D' }],
+      ['Chase theme, reprise', 8, { DRUMS: 'B', SLEIGH: 'B', BASS: 'B', LEAD: 'A', BELLS: 'C', 'OSTINATO ARP': 'A', BRASS: 'A' }],
+    ],
+  };
+});
+
+/* ============ LAST CALL SWAGGER ============ */
+DSL.register({
+  key: 'last-call-swagger', name: 'Last Call Swagger', style: 'Woozy detuned swagger-funk', bpm: 108, swing: 0.38, keyName: 'G minor', group: 'boozerang', by: 'Sonnet 5.5',
+  desc: 'Boozerang Alcoholic Mode: a lazy, swung, slightly out-of-tune swagger in G minor that gets busier every round (quarter-note bass, then eighths, then sixteenths, then a full chug) before the whole thing drains away in half-time and staggers back to the start.',
+}, () => {
+  const { mel, drums, times, rep, arp } = DSL;
+  const bars = (list, f) => list.map(f).join(' | ');
+
+  const P_IN = ['Gm', 'Gm', 'Cm', 'D7'];
+  const P_A = ['Gm', 'Gm', 'Cm', 'Cm', 'Gm', 'Gm', 'D7', 'D7'];
+  const P_B = ['Eb', 'D7', 'Gm', 'Gm', 'Cm', 'D7', 'Gm', 'D7'];
+  const P_DR = ['Gm', 'Gm', 'Cm', 'Cm', 'Gm', 'Eb', 'D7', 'D7'];
+
+  const ROOT = { Gm: 'G1', Cm: 'C2', D7: 'D2', Eb: 'Eb2' };
+  const FIF = { Gm: 'D2', Cm: 'G2', D7: 'A2', Eb: 'Bb2' };
+  const ALT = { Gm: 'F2', Cm: 'Bb2', D7: 'C3', Eb: 'G2' };
+  const KV = { Gm: 'Bb3+D4+G4', Cm: 'C4+Eb4+G4', D7: 'A3+C4+D4+F#4', Eb: 'Bb3+Eb4+G4' };
+  const PV = { Gm: 'D4+G4+Bb4', Cm: 'Eb4+G4+C5', D7: 'C4+D4+F#4+A4', Eb: 'Bb3+Eb4+G4' };
+  const HV = { Gm: 'D5+G5+Bb5', Cm: 'Eb5+G5+C6', D7: 'F#5+A5+C6', Eb: 'G5+Bb5+Eb6' };
+  const CK = { Gm: 'G6+D7', Cm: 'G6+C7', D7: 'A6+D7', Eb: 'Bb6+Eb7' };
+  const SYM = { Gm: 'Gm', Cm: 'Cm', D7: 'D7', Eb: 'Eb' };
+  const R8 = (n) => up8(n);
+
+  const bIn = (c) => `${ROOT[c]}:3 .:1 ${ROOT[c]}:4 .:8`;
+  const b1 = (c) => { const r = ROOT[c], f = FIF[c], a = ALT[c]; return `${r}:2 .:1 ${r}:1 ${R8(r)}:2 .:2 ${f}:1 .:1 ${r}:2 ${a}:1 ${f}:1 .:2`; };
+  const b2 = (c) => { const r = ROOT[c], f = FIF[c], a = ALT[c]; return `${r}:2 ${r}:1 ${R8(r)}:1 ${r}:2 ${f}:1 ${r}:1 ${a}:2 ${f}:1 ${r}:1 ${R8(r)}:2 ${f}:1 ${a}:1`; };
+  const b3 = (c) => { const r = ROOT[c], f = FIF[c], a = ALT[c], R = R8(r); return [r, r, R, r, r, R, r, f, r, r, R, r, f, r, a, R].map((n) => `${n}:1`).join(' '); };
+  const b4 = (c) => rep(`${ROOT[c]}:1 ${R8(ROOT[c])}:1`, 8);
+  const bDr = (c) => `${ROOT[c]}:16`;
+
+  const kIn = (c) => `${KV[c]}:8 .:8`;
+  const kS = (c) => `.:2 ${KV[c]}:2 .:3 ${KV[c]}:1 .:2 ${KV[c]}:2 .:2 ${KV[c]}:1 .:1`;
+  const kH = (c) => `${KV[c]}:3 .:1 ${KV[c]}:2 .:2 ${KV[c]}:3 .:1 ${KV[c]}:2 .:2`;
+  const kF = (c) => rep(`.:2 ${KV[c]}:1 .:1`, 4);
+  const kDr = (c) => `${KV[c]}:4 .:12`;
+  const pad = (c) => `${PV[c]}:16`;
+  const hornSwell = (c) => `${HV[c]}:16`;
+  const hornHit = (c) => `${HV[c]}:4 .:2 ${HV[c]}:2 .:2 ${HV[c]}:2 .:2 ${HV[c]}:2`;
+  const clink2 = (c) => `${CK[c]}:2 .:6 ${CK[c]}:2 .:6`;
+  const clink1 = (c) => `${CK[c]}:2 .:14`;
+  const arpOf = (p) => p.map((c) => [SYM[c], 16]);
+
+  /* ---- sax lines (allowed: chord tones plus safe passing tones) ---- */
+  const S_IN = '.:32 | .:8 G5:4 Bb5:4 | A5:6 F#5:2 D5:8';
+  const S_A = '.:2 D5:2 F5:2 G5:6 F5:2 D5:2 | Bb5:4 G5:2 .:2 D5:4 .:4 | .:2 G5:2 Bb5:2 C6:6 Bb5:2 G5:2 | Eb5:4 G5:2 .:2 Eb5:4 C5:4 | ' +
+    '.:2 D5:2 F5:2 G5:4 A5:2 Bb5:2 G5:2 | D6:4 Bb5:2 .:2 G5:6 .:2 | .:2 A5:2 C6:2 D6:6 C6:2 A5:2 | F#5:4 A5:2 .:2 D5:4 .:2 A4:2';
+  const S_B = 'D5:2 F5:1 G5:1 Bb5:2 G5:2 F5:2 D5:2 G5:4 | Bb5:3 .:1 D6:2 Bb5:2 G5:4 .:4 | G5:2 Bb5:1 C6:1 Eb6:2 C6:2 Bb5:2 G5:2 Eb5:4 | C6:6 Bb5:2 G5:4 Eb5:4 | ' +
+    '.:2 D5:2 G5:2 Bb5:2 D6:2 C6:2 Bb5:2 G5:2 | A5:2 G5:2 F5:2 D5:2 G5:8 | A5:2 C6:2 D6:2 F#6:2 A6:4 F#6:2 D6:2 | C6:2 A5:2 F#5:2 D5:2 C5:4 A4:4';
+  const S_C = 'G5:4 Bb5:4 G6:4 Eb6:4 | F#6:4 D6:4 A5:4 C6:2 A5:2 | Bb5:4 D6:4 G6:8 | F6:4 D6:4 Bb5:4 G5:4 | ' +
+    'G5:4 C6:4 Eb6:4 G6:4 | F#6:2 F#6:2 A6:4 F#6:4 D6:4 | D6:2 Bb5:2 G5:2 Bb5:2 D6:4 G6:4 | F#6:4 D6:4 A5:4 F#5:4';
+  const gm1 = 'G5:1 G5:1 Bb5:2 D6:2 Bb5:1 G5:1 F5:2 G5:2 .:2 D5:2';
+  const gm2 = 'G5:1 G5:1 Bb5:2 D6:2 F6:2 D6:2 Bb5:2 G5:4';
+  const cm1 = 'C6:1 C6:1 Eb6:2 G6:2 Eb6:1 C6:1 Bb5:2 G5:2 .:2 Eb5:2';
+  const cm2 = 'C6:1 C6:1 Eb6:2 G6:2 Bb6:2 G6:2 Eb6:2 C6:4';
+  const d1 = 'D6:1 D6:1 F#6:2 A6:2 F#6:1 D6:1 C6:2 A5:2 .:2 F#5:2';
+  const d2 = 'D6:1 D6:1 F#6:2 A6:2 C7:2 A6:2 F#6:2 D6:4';
+  const S_D = [gm1, gm2, cm1, cm2, gm1, gm2, d1, d2].join(' | ');
+  const S_E = 'D6:8 Bb5:4 D6:4 | G6:10 F6:2 D6:2 Bb5:2 | Eb6:8 C6:4 Eb6:4 | G6:10 Eb6:2 C6:2 G5:2 | ' +
+    'D6:8 Bb5:4 D6:4 | F6:6 D6:2 Bb5:4 G5:4 | A6:8 F#6:4 D6:4 | C6:4 A5:4 F#5:4 D5:4';
+  const S_F = 'D5:12 F5:4 | G5:16 | Eb5:8 C5:8 | G4:16 | Bb4:8 D5:8 | G4:16 | A4:12 F#4:4 | D4:16';
+
+  /* ---- drums ---- */
+  const sw = { BD: 'x.....x...x.....', SD: '....x.......x...', CP: '....g.......g...', CH: 'xgxgxgxgxgxgxgxg', OH: '..............x.' };
+  const swFill = { BD: 'x.....x...x.....', SD: '....x...x.x.xxxX', CH: 'xgxgxgxg........', HT: '..........x.....', MT: '............x...', LT: '..............X.' };
+  const rd = { BD: 'x.....x..x.x....', SD: 'g...x..g....x..g', CP: '....g.......g...', CH: 'xgxgxgxgxgxgxgxg', OH: '..x...x...x...x.' };
+  const rdFill = { BD: 'x.....x..x.x....', SD: '....x...x.x.xxxX', CH: 'xgxgxgxg........', HT: '..........x.....', MT: '............x...', LT: '..............X.' };
+  const br = { BD: 'x.......x.......', SD: '....x.......x...', CB: '..x...x...x...x.', SH: 'xoxoxoxoxoxoxoxo' };
+  const brFill = { BD: 'x.......x.......', SD: 'x.x.x.x.xxxxxxxx', CB: '................', SH: 'xoxoxoxo........' };
+  const fs = { BD: 'x...x...x...x...', SD: '....x.......x...', CP: '....x.......x...', CH: 'XgxgXgxgXgxgXgxg', OH: '..x...x...x...x.' };
+  const fsIn = Object.assign({}, fs, { CY: 'X...............' });
+  const fsFill = { BD: 'x...x...x...x...', SD: '....x...x.x.xxXX', CH: 'x.x.x.x.........', HT: '..........x.....', MT: '............x...', LT: '..............X.' };
+  const pk = { BD: 'x.x.x.x.x.x.x.x.', SD: '....x.......x...', CP: '....x.......x...', CH: 'xxxxxxxxxxxxxxxx', OH: '..x...x...x...x.', CB: '..x...x...x...x.' };
+  const pkIn = Object.assign({}, pk, { CY: 'X...............' });
+  const pkFill = { BD: 'x.x.x.x.x.x.x.x.', SD: 'x.x.x.x.xxxxxxXX', CH: 'xxxxxxxx........', CY: '................' };
+  const intro = [
+    { BD: 'x...............', CH: 'o...o...o...o...' },
+    { BD: 'x.......x.......', CH: 'o...o...o...o...', RS: '............o...' },
+    { BD: 'x.......x.......', SD: '........x.......', CH: 'o.o.o.o.o.o.o.o.' },
+    { BD: 'x.......x.......', SD: 'g.g.g.g.xxxXXXXX', CH: 'o.o.o.o.o.o.o.o.' },
+  ];
+  const dr = { BD: 'x...............', SD: '........x.......', CH: 'o...o...o...o...' };
+  const drEnd = { BD: 'x.......x.......', SD: '........x.......', CP: '..............g.' };
+
+  return {
+    name: 'Last Call Swagger', bpm: 108, swing: 0.38, key: { root: 7, scale: 'minor' },
+    fx: { revSize: 0.55, revLvl: 0.4, dlyDiv: '1/8d', dlyFb: 0.34, dlyTone: 0.45, dlyLvl: 0.34, gateLvl: 0.6, comp: 0.45, vol: 0.73 },
+    tracks: [
+      { name: 'DRUMS', type: 'drum', kit: 'boombox', color: '#ff5a36', vol: 0.76, rev: 0.06,
+        voices: { BD: { lvl: 0.92 }, SD: { lvl: 0.7 }, CP: { lvl: 0.55 }, CH: { lvl: 0.34 }, OH: { lvl: 0.34 }, CB: { lvl: 0.34 }, CY: { lvl: 0.42 }, HT: { lvl: 0.55 }, MT: { lvl: 0.55 }, LT: { lvl: 0.55 }, SH: { lvl: 0.45 } },
+        pats: {
+          A: drums(intro),
+          B: drums(times(sw, 7).concat([swFill])),
+          C: drums(times(rd, 7).concat([rdFill])),
+          D: drums(times(br, 7).concat([brFill])),
+          E: drums([fsIn].concat(times(fs, 6), [fsFill])),
+          F: drums([pkIn].concat(times(pk, 6), [pkFill])),
+          G: drums(times(dr, 7).concat([drEnd])),
+        } },
+      { name: 'BASS', preset: 'rubber', color: '#3ce6ff', vol: 0.7, rev: 0.02, synth: { det2: 8 },
+        pats: {
+          A: mel(bars(P_IN, bIn), { expect: 64 }),
+          B: mel(bars(P_A, b1), { expect: 128 }),
+          C: mel(bars(P_A, b2), { expect: 128 }),
+          D: mel(bars(P_B, b2), { expect: 128 }),
+          E: mel(bars(P_A, b3), { expect: 128 }),
+          F: mel(bars(P_A, b4), { expect: 128 }),
+          G: mel(bars(P_DR, bDr), { expect: 128 }),
+        } },
+      { name: 'KEYS', preset: 'stab', color: '#ff9a3c', vol: 0.4, rev: 0.25, pan: -0.2,
+        synth: { w1: 'saw', l1: 0.7, w2: 'saw', l2: 0.7, det2: 28, cut: 1800, fenv: 600, a: 0.01, d: 0.25, s: 0.5, r: 0.08, uni: 1, vib: 20, lfoRate: 3.2 },
+        pats: {
+          A: mel(bars(P_IN, kIn), { expect: 64 }),
+          B: mel(bars(P_A, kS), { expect: 128 }),
+          C: mel(bars(P_B, kH), { expect: 128 }),
+          D: mel(bars(P_A, kF), { expect: 128 }),
+          E: mel(bars(P_DR, kDr), { expect: 128 }),
+        } },
+      { name: 'SAX', preset: 'saxsynth', color: '#ff3d9a', vol: 0.5, rev: 0.3, dly: 0.28, pan: 0.1, synth: { vib: 38, lfoRate: 3.6, det2: 24, glide: 0.07 },
+        pats: {
+          A: mel(S_IN, { expect: 64 }),
+          B: mel(S_A, { expect: 128 }),
+          C: mel(S_B, { expect: 128 }),
+          D: mel(S_C, { expect: 128 }),
+          E: mel(S_D, { expect: 128 }),
+          F: mel(S_E, { expect: 128 }),
+          G: mel(S_F, { expect: 128 }),
+        } },
+      { name: 'OSTINATO ARP', preset: 'arpglass', color: '#b58cff', vol: 0.3, rev: 0.25, dly: 0.28, pan: -0.3, synth: { det2: 26 },
+        pats: {
+          A: arp(arpOf(P_A), { low: 'G4', rate: 2, len: 2, order: [0, 1, 2, 1], vel: 0.42, acc: 0.58, accEvery: 4 }),
+          B: arp(arpOf(P_B), { low: 'G4', rate: 2, len: 2, order: [0, 1, 2, 1], vel: 0.42, acc: 0.58, accEvery: 4 }),
+          C: arp(arpOf(P_A), { low: 'G4', rate: 1, len: 1, order: [0, 1, 2, 1, 0, 2, 1, 2], vel: 0.4, acc: 0.58, accEvery: 4 }),
+        } },
+      { name: 'PAD', preset: 'vapor', color: '#6fa8ff', vol: 0.3, rev: 0.4, synth: { det2: 30, vib: 24, lfoRate: 2.4 },
+        pats: {
+          A: mel(bars(P_IN, pad), { expect: 64 }),
+          B: mel(bars(P_A, pad), { expect: 128 }),
+          C: mel(bars(P_B, pad), { expect: 128 }),
+          D: mel(bars(P_DR, pad), { expect: 128 }),
+        } },
+      { name: 'HORNS', preset: 'fmbrass', color: '#ffb02e', vol: 0.38, rev: 0.22, pan: 0.15,
+        pats: {
+          A: mel(bars(P_B, hornSwell), { expect: 128 }),
+          B: mel(bars(P_A, hornHit), { expect: 128 }),
+        } },
+      { name: 'CLINK', preset: 'bells', color: '#ffffff', vol: 0.26, rev: 0.5, dly: 0.4, pan: 0.4,
+        pats: {
+          A: mel(bars(P_IN, clink2), { expect: 64 }),
+          B: mel(bars(P_B, clink2), { expect: 128 }),
+          C: mel(bars(P_DR, clink1), { expect: 128 }),
+        } },
+      { name: 'HIC', preset: 'zap', color: '#5dffb4', vol: 0.18, rev: 0.3, pan: -0.4,
+        pats: {
+          A: mel('.:13 G5:1 .:34 D6:1 .:15', { expect: 64 }),
+          B: mel('.:77 G5:1 .:50', { expect: 128 }),
+        } },
+      { name: 'RISER', preset: 'windsweep', color: '#c8f0ff', vol: 0.26, rev: 0.4,
+        pats: { A: mel('.:96 G3:32', { expect: 128 }) } },
+    ],
+    sections: [
+      ['Tipsy intro', 4, { DRUMS: 'A', BASS: 'A', KEYS: 'A', SAX: 'A', PAD: 'A', CLINK: 'A', HIC: 'A' }],
+      ['Swagger', 8, { DRUMS: 'B', BASS: 'B', KEYS: 'B', SAX: 'B', PAD: 'B' }],
+      ['Second round', 8, { DRUMS: 'C', BASS: 'C', KEYS: 'B', SAX: 'C', 'OSTINATO ARP': 'A', PAD: 'B' }],
+      ['One more', 8, { DRUMS: 'D', BASS: 'D', KEYS: 'C', SAX: 'D', 'OSTINATO ARP': 'B', PAD: 'C', HORNS: 'A', CLINK: 'B', RISER: 'A' }],
+      ['Faster!', 8, { DRUMS: 'E', BASS: 'E', KEYS: 'D', SAX: 'E', 'OSTINATO ARP': 'C', PAD: 'B', RISER: 'A' }],
+      ['Chug chug chug', 8, { DRUMS: 'F', BASS: 'F', KEYS: 'D', SAX: 'F', 'OSTINATO ARP': 'C', PAD: 'B', HORNS: 'B' }],
+      ['Last call', 8, { DRUMS: 'G', BASS: 'G', KEYS: 'E', SAX: 'G', PAD: 'D', CLINK: 'C', HIC: 'B' }],
+    ],
+  };
+});
+
+/* ============ BOOZERANG VICTORY TOAST ============ */
+DSL.register({
+  key: 'boozerang-victory-toast', name: 'Victory Toast', style: 'Triumphant fanfare jingle', bpm: 120, keyName: 'F major', group: 'boozerang', by: 'Sonnet 5.5',
+  desc: 'Boozerang victory screen: a rising brass fanfare, the Anthem hook played as a toast, a second round with the whole choir and orchestra, and a glass-clink finish. About 24 seconds, and it loops straight back to the fanfare.',
+}, () => {
+  const { mel, drums, times, rep, arp } = DSL;
+  const bars = (list, f) => list.map(f).join(' | ');
+
+  const P_T = ['F', 'C', 'Dm', 'Bb'];
+
+  const ROOT = { F: 'F2', C: 'C2', Dm: 'D2', Bb: 'Bb1' };
+  const STAB = { F: 'A4+C5+F5', C: 'G4+C5+E5', Dm: 'A4+D5+F5', Bb: 'Bb4+D5+F5' };
+  const PADV = { F: 'C4+F4+A4', C: 'C4+E4+G4', Dm: 'D4+F4+A4', Bb: 'D4+F4+Bb4' };
+  const BIG = { F: 'F4+A4+C5+F5', C: 'E4+G4+C5+E5', Dm: 'F4+A4+D5+F5', Bb: 'F4+Bb4+D5+F5' };
+
+  const bounce = (c) => { const r = ROOT[c], R = up8(r); return `${r}:2 ${R}:2 ${r}:2 ${R}:2 ${r}:2 ${R}:2 ${r}:2 ${R}:2`; };
+  const stab = (c) => rep(`.:2 ${STAB[c]}:1 .:1`, 4);
+  const hold = (c) => `${PADV[c]}:16`;
+  const big = (c) => `${BIG[c]}:16`;
+
+  const HOOK = 'C5:2 C5:2 F5:4 E5:2 F5:2 A5:4 | G5:4 E5:2 C5:2 D5:4 E5:4 | D5:2 D5:2 F5:4 E5:2 D5:2 C5:4 | D5:4 C5:2 Bb4:2 C5:8';
+  const HOOK2 = 'C6:2 C6:2 F6:4 E6:2 F6:2 A6:4 | G6:4 E6:2 C6:2 D6:4 E6:4 | D6:2 D6:2 F6:4 E6:2 D6:2 C6:4 | D6:4 C6:2 Bb5:2 C6:8';
+  const FIN_L = 'D6:4 F6:4 E6:4 G6:4 | C6:2 F6:2 A6:12';
+
+  const thm = { BD: 'x...x...x...x...', SD: '....x.......x...', CP: '....x.......x...', CH: 'x.x.x.x.x.x.x.x.', OH: '..............x.' };
+  const thmIn = Object.assign({}, thm, { CY: 'X...............' });
+  const fill = { BD: 'x...x...x...x...', SD: '....x...x.x.xxXX', CP: '....x...........', CH: 'x.x.x.x.........', HT: '..........x.....', MT: '............x...', LT: '..............X.' };
+  const fan = [{ BD: 'x.......x.......', SD: 'x.x.x.x.xxxxxxxx', CY: 'X...............' }, { BD: 'x...x...x...x...', SD: 'xxxxxxxxxxxxXXXX' }];
+  const fin = [{ BD: 'x...x...x...x...', SD: 'x.x.x.x.xxxxXXXX' }, { BD: 'X...............', SD: 'X...............', CP: 'X...............', CY: 'X...............', CB: '....x...........' }];
+
+  return {
+    name: 'Victory Toast', bpm: 120, key: { root: 5, scale: 'major' },
+    fx: { revSize: 0.5, revLvl: 0.4, dlyDiv: '1/8d', dlyFb: 0.25, dlyTone: 0.5, dlyLvl: 0.3, gateLvl: 0.72, comp: 0.45, vol: 0.70 },
+    tracks: [
+      { name: 'DRUMS', type: 'drum', kit: 'studio', color: '#ff5a36', vol: 0.78, rev: 0.05,
+        voices: { SD: { gate: 0.72 }, CP: { lvl: 0.62, gate: 0.35 }, CH: { lvl: 0.4 }, OH: { lvl: 0.34 }, CY: { lvl: 0.45 }, CB: { lvl: 0.5 } },
+        pats: {
+          A: drums(fan),
+          B: drums([thmIn].concat(times(thm, 2), [fill])),
+          C: drums([thmIn].concat(times(thm, 2), [fill])),
+          D: drums(fin),
+        } },
+      { name: 'BASS', preset: 'pulsebass', color: '#3ce6ff', vol: 0.72, rev: 0.02,
+        pats: {
+          A: mel('F2:4 F2:4 F2:4 F2:4 | C2:4 C2:4 C2:4 C2:4', { expect: 32 }),
+          B: mel(bars(P_T, bounce), { expect: 64 }),
+          C: mel(bars(P_T, bounce), { expect: 64 }),
+          D: mel('Bb1:8 C2:8 | F2:6 .:10', { expect: 32 }),
+        } },
+      { name: 'HORNS', preset: 'fmbrass', color: '#ffb02e', vol: 0.42, rev: 0.22, pan: -0.15,
+        pats: {
+          A: mel('A4+C5+F5:2 A4+C5+F5:2 C5+F5+A5:4 A4+C5+F5:2 C5+F5+A5:2 F5+A5+C6:4 | G4+C5+E5:2 G4+C5+E5:2 C5+E5+G5:4 .:2 C5+E5+G5:6', { expect: 32 }),
+          B: mel(bars(P_T, big), { expect: 64 }),
+          C: mel('Bb4+D5+F5:8 C5+E5+G5:8 | F4+A4+C5+F5:6 .:10', { expect: 32 }),
+        } },
+      { name: 'BRASS', preset: 'brass', color: '#ff9a3c', vol: 0.4, rev: 0.2, pan: 0.15,
+        pats: { A: mel(bars(P_T, stab), { expect: 64 }) } },
+      { name: 'LEAD', preset: 'outrun', color: '#ff3d9a', vol: 0.56, rev: 0.25, dly: 0.28, synth: { vib: 14, cut: 3400 },
+        pats: {
+          A: mel(HOOK, { expect: 64 }),
+          B: mel(HOOK2, { expect: 64 }),
+          C: mel(FIN_L, { expect: 32 }),
+        } },
+      { name: 'CHOIR', preset: 'choir', color: '#ff9a3c', vol: 0.34, rev: 0.42, pan: 0.1,
+        pats: {
+          A: mel(bars(P_T, (c) => `${STAB[c]}:16`), { expect: 64 }),
+          B: mel('Bb4+D5+F5:8 C5+E5+G5:8 | A4+C5+F5:16', { expect: 32 }),
+        } },
+      { name: 'STRINGS', preset: 'strings', color: '#6fa8ff', vol: 0.34, rev: 0.4,
+        pats: {
+          A: mel(bars(P_T, hold), { expect: 64 }),
+          B: mel('D4+F4+Bb4:8 C4+E4+G4:8 | C4+F4+A4:16', { expect: 32 }),
+        } },
+      { name: 'BELLS', preset: 'bells', color: '#ffffff', vol: 0.34, rev: 0.45, dly: 0.3, pan: 0.35,
+        pats: {
+          A: arp(P_T.map((c) => [c, 16]), { low: 'C5', rate: 2, len: 2, order: [0, 1, 2, 1, 0, 1, 2, 3], vel: 0.5, acc: 0.65, accEvery: 4 }),
+          B: mel('.:16 | .:4 F6+C7:2 .:2 A6+C7:2 .:2 F7+A6:2 .:2', { expect: 32 }),
+        } },
+      { name: 'ORCH', preset: 'orchhit', color: '#c8f0ff', vol: 0.36, rev: 0.35,
+        pats: {
+          A: mel('F3+C4+F4+A4:2 .:14 | .:48', { expect: 64 }),
+          B: mel('F3+C4+F4+A4:2 .:14 | .:48', { expect: 64 }),
+          C: mel('Bb2+F3+Bb3+D4:2 .:6 C3+G3+C4+E4:2 .:6 | F3+C4+F4+A4+C5:6 .:10', { expect: 32 }),
+        } },
+      { name: 'RISER', preset: 'windsweep', color: '#c8f0ff', vol: 0.26, rev: 0.4,
+        pats: { A: mel('.:16 C3:16', { expect: 32 }) } },
+    ],
+    sections: [
+      ['Fanfare', 2, { DRUMS: 'A', BASS: 'A', HORNS: 'A' }],
+      ['Toast', 4, { DRUMS: 'B', BASS: 'B', BRASS: 'A', LEAD: 'A', STRINGS: 'A', BELLS: 'A', ORCH: 'A' }],
+      ['Second round', 4, { DRUMS: 'C', BASS: 'C', HORNS: 'B', LEAD: 'B', CHOIR: 'A', STRINGS: 'A', BELLS: 'A', ORCH: 'B' }],
+      ['Glass clink', 2, { DRUMS: 'D', BASS: 'D', HORNS: 'C', LEAD: 'C', CHOIR: 'B', STRINGS: 'B', BELLS: 'B', ORCH: 'C', RISER: 'A' }],
+    ],
+  };
+});
+
+/* ============ RAINY WINDOW ============ */
+DSL.register({
+  key: 'rainy-window', name: 'Rainy Window', style: 'Lo-fi jazz', bpm: 78, keyName: 'F major', group: 'claude', by: 'Opus 5.5 Low',
+  desc: 'Lazy swung lo-fi jazz: rootless electric-piano chords, a fretless walking bass, a breathy sax tune and soft music-box bells.',
+}, () => {
+  const { mel, drums, times, arp } = DSL;
+  const PROG = [['Gm7', 16], ['C7', 16], ['Fmaj7', 16], ['Dm7', 16], ['Bbmaj7', 16], ['A7', 16], ['Dm7', 16], ['Am7', 8], ['D7', 8]];
+  const BRIDGE = [['Bbmaj7', 16], ['Am7', 16], ['Gm7', 16], ['C7', 16]];
+
+  // rootless lo-fi voicings
+  const V = {
+    Gm9: 'F3+A3+Bb3+D4', C13: 'E3+A3+Bb3+D4', Fmaj9: 'A3+C4+E4+G4', Dm9: 'F3+A3+C4+E4',
+    Bbmaj9: 'A3+C4+D4+F4', A7: 'G3+C#4+E4', Am7: 'G3+C4+E4', Dm7: 'F3+A3+C4+D4', D9: 'F#3+C4+E4',
+  };
+  const comp = (c) => `.:2 ${c}:6 .:4 ${c}:4?`;
+  const halfComp = (a, b) => `.:2 ${a}:6 .:2 ${b}:6?`;
+  const KEYS_A = [comp(V.Gm9), comp(V.C13), comp(V.Fmaj9), comp(V.Dm9), comp(V.Bbmaj9), comp(V.A7), comp(V.Dm7), halfComp(V.Am7, V.D9)].join(' | ');
+  const KEYS_BR = [V.Bbmaj9, V.Am7, V.Gm9, V.C13].map((c) => `${c}:10 ${c}:6?`).join(' | ');
+
+  const walk = (r, f, m, a) => `${r}:6 ${f}:2 ${m}:4 ${a}:4`;
+  const BASS_A = [walk('G1', 'D2', 'Bb1', 'B1'), walk('C2', 'G1', 'E2', 'E1'), walk('F1', 'C2', 'A1', 'C#2'), walk('D2', 'A1', 'F1', 'F#1'),
+    walk('Bb1', 'F1', 'D2', 'A1'), walk('A1', 'E1', 'C#2', 'C#2'), walk('D2', 'A1', 'F1', 'A1'), 'A1:6 E2:2 D2:6 F#1:2'].join(' | ');
+  const BASS_BR = [walk('Bb1', 'F1', 'D2', 'B1'), walk('A1', 'E1', 'C2', 'G#1'), walk('G1', 'D2', 'Bb1', 'B1'), walk('C2', 'G1', 'E2', 'A1')].join(' | ');
+
+  const groove = { BD: 'X......x..x.....', SD: '....x.......x...', CH: 'x.o.x.o.x.o.x.oo', SH: '..g...g...g...g.' };
+  const groove2 = { BD: 'X......x..x...x.', SD: '....x.......x..g', CH: 'x.o.x.o.x.o.x.o.', SH: '..g...g...g...g.' };
+  const fill = { BD: 'X......x........', SD: '....x.....g.x.xo', CH: 'x.o.x.o.x.o.....', OH: '............x...' };
+  const rim = { RS: '....x.......x...', CH: 'o.g.o.g.o.g.o.g.' };
+  const brush = { BD: 'x.........x.....', RS: '....x.......x...', CH: 'o.g.o.g.o.g.o.g.', SH: 'g.g.g.g.g.g.g.g.' };
+
+  return {
+    name: 'Rainy Window', bpm: 78, swing: 0.45, key: { root: 5, scale: 'major' },
+    fx: { revSize: 0.6, revLvl: 0.42, dlyDiv: '1/8d', dlyFb: 0.3, dlyTone: 0.35, dlyLvl: 0.3, gateLvl: 0.3, comp: 0.5, vol: 0.8 },
+    tracks: [
+      { name: 'DRUMS', type: 'drum', kit: 'boombox', color: '#d9a066', vol: 0.72, rev: 0.06,
+        voices: { BD: { lvl: 0.9 }, SD: { lvl: 0.55 }, RS: { lvl: 0.5 }, CH: { lvl: 0.32 }, OH: { lvl: 0.28 }, SH: { lvl: 0.3 } },
+        pats: {
+          A: drums(times(rim, 3).concat([{ RS: '....x.......x...', CH: 'o.g.o.g.o.......', SD: '..........g.x.xo' }])),
+          B: drums([groove, groove2, groove, groove2, groove, groove2, groove, fill]),
+          C: drums(times(brush, 3).concat([fill])),
+          E: drums([{ BD: 'x...............', OH: 'o...............' }]),
+        } },
+      { name: 'BASS', preset: 'fretless', color: '#8fc1a9', vol: 0.7, rev: 0.03,
+        pats: { A: mel(BASS_A, { expect: 128 }), B: mel(BASS_BR, { expect: 64 }), E: mel('F1:16') } },
+      { name: 'KEYS', preset: 'epiano', color: '#e8c39e', vol: 0.5, rev: 0.32, dly: 0.12, cho: 0.3,
+        pats: {
+          A: mel(KEYS_A, { expect: 128 }),
+          B: mel(KEYS_BR, { expect: 64 }),
+          E: mel('A3+C4+E4+G4:16'),
+        } },
+      { name: 'SAX', preset: 'saxsynth', color: '#f2d16b', vol: 0.56, rev: 0.3, dly: 0.26, pan: 0.08,
+        pats: {
+          A: mel('.:2 D5:2 F5:2 A5:4 G5:2 F5:4 | E5:6 D5:2 C5:2 Bb4:2 G4:4 | A4:8 .:2 C5:2 E5:4 | D5:12 .:4 | ' +
+            '.:2 F5:2 D5:2 A4:2 C5:4 D5:4 | C#5:4 E5:4 G5:4 E5:2 D5:2 | F5:6 E5:2 D5:4 A4:4 | G4:4 A4:4 C5:4 F#4:4', { expect: 128 }),
+          B: mel('G5:4 F5:2 D5:2 F5:4 A5:4 | G5:6 E5:2 Bb5:4 G5:4 | A5:12 .:4 | F5:2 E5:2 D5:2 C5:2 A4:8 | ' +
+            'D5:4 F5:4 A5:8 | G5:4 E5:2 C#5:2 A4:8 | D5:4 F5:2 A5:2 G5:4 F5:4 | E5:8 D5:4 .:4', { expect: 128 }),
+          E: mel('.:4 C5:4? A4:8'),
+        } },
+      { name: 'BELLS', preset: 'bells', color: '#b9d7ff', vol: 0.3, rev: 0.45, dly: 0.3, pan: -0.25,
+        pats: {
+          A: arp(PROG, { low: 'F5', rate: 2, len: 2, order: [0, 2, 1, 3], vel: 0.42, acc: 0.55, accEvery: 8 }),
+          B: arp(BRIDGE, { low: 'D5', rate: 2, len: 2, order: [0, 1, 2, 3, 2, 1], vel: 0.45, acc: 0.6, accEvery: 6 }),
+        } },
+      { name: 'PAD', preset: 'vapor', color: '#9a8fd1', vol: 0.3, rev: 0.5,
+        pats: {
+          A: mel('F3+Bb3+D4:16 | E3+Bb3+D4:16 | E3+A3+C4:16 | F3+A3+C4:16 | F3+A3+D4:16 | E3+G3+C#4:16 | F3+A3+D4:16 | E3+G3+C4:8 F#3+C4+D4:8', { expect: 128 }),
+          B: mel('D3+F3+A3:16 | C3+E3+G3:16 | D3+F3+Bb3:16 | E3+G3+Bb3:16', { expect: 64 }),
+        } },
+    ],
+    sections: [
+      ['Intro', 4, { DRUMS: 'A', KEYS: 'A', BELLS: 'A' }],
+      ['Head 1', 8, { DRUMS: 'B', BASS: 'A', KEYS: 'A', SAX: 'A' }],
+      ['Head 2', 8, { DRUMS: 'B', BASS: 'A', KEYS: 'A', SAX: 'B', PAD: 'A', BELLS: 'A' }],
+      ['Bridge', 8, { DRUMS: 'C', BASS: 'B', KEYS: 'B', BELLS: 'B', PAD: 'B' }],
+      ['Head 3', 8, { DRUMS: 'B', BASS: 'A', KEYS: 'A', SAX: 'A', PAD: 'A' }],
+      ['Outro', 4, { DRUMS: 'C', KEYS: 'A', BELLS: 'A', PAD: 'A' }],
+      ['End', 1, { DRUMS: 'E', BASS: 'E', KEYS: 'E', SAX: 'E' }],
+    ],
+  };
+});
 
 /* ---- js/31-songs-o.js ---- */
 /* Built-in songs, part 15: more public-domain classics in 1984 dress, arranged by Sonnet 5.5 Extra — Ride of the Valkyries (Wagner),
